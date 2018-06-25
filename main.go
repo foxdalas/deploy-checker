@@ -5,7 +5,7 @@ import (
 	"flag"
 	"os"
 	"errors"
-	"github.com/foxdalas/traefik/log"
+	log "github.com/sirupsen/logrus"
 )
 
 type Checker struct  {
