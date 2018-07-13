@@ -165,19 +165,19 @@ func (c *Checker) readKubernetesDeployment() {
 		config, err = clientcmd.BuildConfigFromFlags("", c.kube.kubeconfig)
 		if err != nil {
 			log.Warnf("failed to create kubeconfig client: %v.", err)
-			panic("kube init failed as both in-cluster and dev connection unavailable")
+			log.Panic("kube init failed as both in-cluster and dev connection unavailable")
 		}
 	}
 
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 
 	deploymentsClient := clientset.AppsV1().Deployments(c.kube.kubenamespace)
 	o, err := deploymentsClient.Get(c.inRepoDeployment.Name,metav1.GetOptions{})
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 
 	c.currentDeployment = o
@@ -192,7 +192,7 @@ func (c *Checker) updateDeploymentFile() {
 
 	f, err := os.Create(c.deployment)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	defer f.Close()
 
@@ -200,6 +200,6 @@ func (c *Checker) updateDeploymentFile() {
 	s := json.NewYAMLSerializer(json.DefaultMetaFactory, nil, nil)
 	err = s.Encode(c.inRepoDeployment, f)
 	if err !=nil {
-		panic(err)
+		log.Panic(err)
 	}
 }
