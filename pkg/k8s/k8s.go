@@ -127,17 +127,17 @@ func (k *k8s) deploymentInProgress(name string) (string, bool, error) {
 			return "", false, fmt.Errorf("deployment %q exceeded its progress deadline", name)
 		}
 		if deployment.Spec.Replicas != nil && deployment.Status.UpdatedReplicas < *deployment.Spec.Replicas {
-			return fmt.Sprintf("Waiting for deployment %q rollout to finish: %d out of %d new replicas have been updated...\n", name, deployment.Status.UpdatedReplicas, *deployment.Spec.Replicas), false, nil
+			return fmt.Sprintf("Waiting for deployment %q rollout to finish: %d out of %d new replicas have been updated...", name, deployment.Status.UpdatedReplicas, *deployment.Spec.Replicas), false, nil
 		}
 		if deployment.Status.Replicas > deployment.Status.UpdatedReplicas {
-			return fmt.Sprintf("Waiting for deployment %q rollout to finish: %d old replicas are pending termination...\n", name, deployment.Status.Replicas-deployment.Status.UpdatedReplicas), false, nil
+			return fmt.Sprintf("Waiting for deployment %q rollout to finish: %d old replicas are pending termination...", name, deployment.Status.Replicas-deployment.Status.UpdatedReplicas), false, nil
 		}
 		if deployment.Status.AvailableReplicas < deployment.Status.UpdatedReplicas {
-			return fmt.Sprintf("Waiting for deployment %q rollout to finish: %d of %d updated replicas are available...\n", name, deployment.Status.AvailableReplicas, deployment.Status.UpdatedReplicas), false, nil
+			return fmt.Sprintf("Waiting for deployment %q rollout to finish: %d of %d updated replicas are available...", name, deployment.Status.AvailableReplicas, deployment.Status.UpdatedReplicas), false, nil
 		}
-		return fmt.Sprintf("deployment %q successfully rolled out\n", name), true, nil
+		return fmt.Sprintf("deployment %q successfully rolled out", name), true, nil
 	}
-	return fmt.Sprintf("Waiting for deployment spec update to be observed...\n"), false, nil
+	return fmt.Sprintf("Waiting for deployment spec update to be observed..."), false, nil
 }
 
 func getDeploymentCondition(status v1beta1.DeploymentStatus, condType v1beta1.DeploymentConditionType) *v1beta1.DeploymentCondition {
