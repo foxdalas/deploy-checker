@@ -152,7 +152,7 @@ func getDeploymentCondition(status v1beta1.DeploymentStatus, condType v1beta1.De
 
 func (k *k8s) Wait(name string, wg *sync.WaitGroup) error {
 	defer wg.Done()
-
+	var message string
 	ticker := 0
 	for {
 		state, status, err := k.deploymentInProgress(name)
@@ -160,7 +160,10 @@ func (k *k8s) Wait(name string, wg *sync.WaitGroup) error {
 			k.Log().Error(err)
 			return err
 		}
-		k.Log().Info(state)
+		if (message != state) {
+			k.Log().Info(state)
+			message = state
+		}
 		if status {
 			return nil
 		}
