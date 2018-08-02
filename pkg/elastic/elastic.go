@@ -13,21 +13,17 @@ import (
 )
 
 func New(checker checker.Checker, elasticHost string) (*elasticSearch, error) {
-	ctx := context.Background()
 
 	client, err := elastic.NewClient(
-		elastic.SetSniff(false),
 		elastic.SetURL(elasticHost),
+		elastic.SetSniff(false),
 		elastic.SetRetrier(NewEsRetrier()),
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	_, _, err = client.Ping(elasticHost).Do(ctx)
-	if err != nil {
-		return nil, err
-	}
+	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second) // requests will time out after 1 second
 
 	return &elasticSearch{
 		checker: checker,
@@ -64,10 +60,6 @@ func (e *elasticSearch) Notify(apps string, tags string, user string, namespace 
 		e.createIndex()
 		e.sendDocument(apps, tags, user, namespace)
 	}
-}
-
-type EsRetrier struct {
-	backoff elastic.Backoff
 }
 
 func NewEsRetrier() *EsRetrier {

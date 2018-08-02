@@ -160,7 +160,7 @@ func (k *k8s) Wait(name string, wg *sync.WaitGroup) error {
 			k.Log().Error(err)
 			return err
 		}
-		if (message != state) {
+		if message != state {
 			k.Log().Info(state)
 			message = state
 		}

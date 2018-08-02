@@ -24,3 +24,7 @@ type document struct {
 	Msg       string    `json:"msg"`
 	Tags      string    `json:"tags"`
 }
+
+type EsRetrier struct {
+	backoff elastic.Backoff
+}
