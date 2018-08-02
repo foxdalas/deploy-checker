@@ -13,11 +13,13 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
 
-func New(checker checker.Checker, kubeconfig string, namespace string, deploymentFile string) (*k8s, error) {
+func New(checker checker.Checker, kubeconfig string, namespace string) (*k8s, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		checker.Log().Warnf("failed to create in-cluster client: %v.", err)
@@ -29,10 +31,9 @@ func New(checker checker.Checker, kubeconfig string, namespace string, deploymen
 	clientset, err := kubernetes.NewForConfig(config)
 
 	return &k8s{
-		checker:        checker,
-		client:         clientset,
-		namespace:      namespace,
-		deploymentFile: deploymentFile,
+		checker:   checker,
+		client:    clientset,
+		namespace: namespace,
 	}, err
 }
 
@@ -55,8 +56,8 @@ func (k *k8s) getKubernetesDeployment(name string) *v1beta1.Deployment {
 	return obj
 }
 
-func (k *k8s) getDeploymentFile() {
-	dat, err := ioutil.ReadFile(k.deploymentFile)
+func (k *k8s) getDeploymentFile(path string) {
+	dat, err := ioutil.ReadFile(path)
 	if err != nil {
 		k.Log().Error(err)
 	}
@@ -74,7 +75,7 @@ func (k *k8s) getDeploymentFile() {
 	}
 }
 
-func (k *k8s) updateDeploymentFile() {
+func (k *k8s) updateDeploymentFile(path string) {
 	if *k.k8sDeployment.Spec.Replicas != *k.yamlDeployment.Spec.Replicas {
 		k.Log().Infof("Current deployment is changed. Replicas in repository %d and %d replicas in k8s", *k.yamlDeployment.Spec.Replicas,
 			*k.k8sDeployment.Spec.Replicas)
@@ -85,13 +86,13 @@ func (k *k8s) updateDeploymentFile() {
 	//Fix replicas
 	*k.yamlDeployment.Spec.Replicas = *k.k8sDeployment.Spec.Replicas
 
-	f, err := os.Create(k.deploymentFile)
+	f, err := os.Create(path)
 	if err != nil {
 		k.Log().Fatal(err)
 	}
 	defer f.Close()
 
-	k.Log().Infof("Updating file %s", k.deploymentFile)
+	k.Log().Infof("Updating file %s", path)
 	s := json.NewYAMLSerializer(json.DefaultMetaFactory, nil, nil)
 	err = s.Encode(k.yamlDeployment, f)
 	if err != nil {
@@ -100,13 +101,15 @@ func (k *k8s) updateDeploymentFile() {
 }
 
 func (k *k8s) PrepareDeployment() {
-	k.getDeploymentFile()
+	for _, path := range k.findDeployments(".") {
+		k.getDeploymentFile(path)
 
-	if k.isDeploymentExist(k.yamlDeployment.Name) {
-		k.k8sDeployment = k.getKubernetesDeployment(k.yamlDeployment.Name)
-		k.updateDeploymentFile()
-	} else {
-		k.Log().Infof("Deployment not found in kubernetes. Is a new deploy %s", k.yamlDeployment.Name)
+		if k.isDeploymentExist(k.yamlDeployment.Name) {
+			k.k8sDeployment = k.getKubernetesDeployment(k.yamlDeployment.Name)
+			k.updateDeploymentFile(path)
+		} else {
+			k.Log().Infof("Deployment not found in kubernetes. Is a new deploy %s", k.yamlDeployment.Name)
+		}
 	}
 }
 
@@ -174,4 +177,20 @@ func (k *k8s) Wait(name string, wg *sync.WaitGroup) error {
 
 func (k *k8s) Log() *log.Entry {
 	return k.checker.Log().WithField("context", "k8s")
+}
+
+func (k *k8s) findDeployments(searchDir string) []string {
+	fileList := []string{}
+	err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
+		if strings.Contains(path, "deployment.yml") {
+			fileList = append(fileList, path)
+			k.Log().Infof("Founded deployment file %s", path)
+		}
+		return nil
+	})
+	if err != nil {
+		k.Log().Error(err)
+	}
+
+	return fileList
 }

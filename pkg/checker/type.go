@@ -25,9 +25,10 @@ type Checker struct {
 	//ElasticSearch
 	ElasticSearchURL string
 
-	Apps string
+	Apps   string
+	Prefix string
 
-	DeploymentFile    string
+	//K8S Deployments
 	CurrentDeployment *v1beta1.Deployment
 	InRepoDeployment  *v1beta1.Deployment
 

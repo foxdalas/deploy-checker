@@ -65,13 +65,13 @@ func params(c *checker.Checker) error {
 		flag.StringVar(&c.KubeConfig, "kubeconfig", "", "absolute path to the kubeconfig file")
 	}
 	flag.StringVar(&c.KubeNamespace, "namespace", "", "Kubernetes namespace")
-	flag.StringVar(&c.DeploymentFile, "deployment", "", "Deployment file")
 
 	flag.StringVar(&c.DockerRepository, "repository", "", "Docker repository")
 	flag.StringVar(&c.DockerTag, "tag", "", "Docker repository tag")
 
 	flag.StringVar(&c.User, "user", "ci", "Run user")
 
+	flag.StringVar(&c.Prefix, "prefix", "", "Prefix back/front/etc")
 	flag.StringVar(&c.Apps, "apps", "", "Application list with separator")
 
 	c.DockerUsername = os.Getenv("DOCKER_USERNAME")
@@ -80,6 +80,10 @@ func params(c *checker.Checker) error {
 	c.ElasticSearchURL = os.Getenv("ELASTICSEARCH_URL")
 
 	flag.Parse()
+
+	if c.Apps == "" {
+		return errors.New("Please provide -apps option")
+	}
 
 	if !c.DeployProgress && !c.Report {
 		if c.DockerRepository == "" {
@@ -95,18 +99,11 @@ func params(c *checker.Checker) error {
 		if c.DockerPassword == "" {
 			return errors.New("Please provide DOCKER_PASSWORD environment value")
 		}
-	}
-
-	if !c.Report {
+	} else {
 		if c.KubeNamespace == "" {
 			return errors.New("Please provide -namespace option")
 		}
 	}
 
-	if c.Report {
-		if c.Apps == "" {
-			return errors.New("Please provide -apps option")
-		}
-	}
 	return nil
 }

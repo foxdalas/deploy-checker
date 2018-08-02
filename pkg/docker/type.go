@@ -1,7 +1,7 @@
 package docker
 
 import (
-	"github.com/heroku/docker-registry-client/registry"
+	"github.com/foxdalas/docker-registry-client/registry"
 )
 
 type docker struct {

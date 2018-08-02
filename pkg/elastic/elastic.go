@@ -18,6 +18,9 @@ func New(checker checker.Checker, elasticHost string) (*elasticSearch, error) {
 		elastic.SetURL(elasticHost),
 		elastic.SetSniff(false),
 		elastic.SetRetrier(NewEsRetrier()),
+		elastic.SetHealthcheck(false),
+		elastic.SetErrorLog(checker.Log()),
+		elastic.SetInfoLog(checker.Log()),
 	)
 	if err != nil {
 		return nil, err

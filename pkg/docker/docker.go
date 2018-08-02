@@ -1,14 +1,14 @@
 package docker
 
 import (
-	"github.com/heroku/docker-registry-client/registry"
+	"github.com/foxdalas/docker-registry-client/registry"
 	log "github.com/sirupsen/logrus"
 	"os"
 )
 
-func New(username string, password string, repository string, tag string) (*docker, error) {
+func New(username string, password string, repository string, tag string, log log.Entry) (*docker, error) {
 	url := "https://registry-1.docker.io/"
-	hub, err := registry.New(url, username, password)
+	hub, err := registry.New(url, username, password, log.Infof)
 	if err != nil {
 		return nil, err
 	}

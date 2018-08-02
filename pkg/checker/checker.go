@@ -27,7 +27,7 @@ func New(version string, logging *log.Entry) *Checker {
 func (c *Checker) Init() {
 	c.Log().Infof("Checker %s starting", c.Ver)
 
-	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.DeploymentFile)
+	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace)
 	if err != nil {
 		c.Log().Fatal()
 	}
@@ -63,7 +63,7 @@ func (c *Checker) Init() {
 		c.elasticReport()
 		os.Exit(exitCode)
 	}
-	c.predeployChecks()
+	c.predeployChecks(c.Prefix, c.Apps)
 }
 
 func (c *Checker) Log() *log.Entry {
@@ -80,28 +80,37 @@ func (c *Checker) Stop() {
 	os.Exit(0)
 }
 
-func (c *Checker) predeployDocker() {
-	docker, err := docker.New(c.DockerUsername, c.DockerPassword, c.DockerRepository, c.DockerTag)
-	if err != nil {
-		c.Log().Fatal(err)
-	}
-	if docker.IsDockerImageExist() {
-		c.Log().Infof("Docker container %s with tag %s exist", c.DockerRepository, c.DockerTag)
-	} else {
-		log.Errorf("Docker container %s with tag %s exist", c.DockerRepository, c.DockerTag)
+func (c *Checker) predeployDocker(prefix string, apps []string) {
+	var project string
+	for _, app := range apps {
+		if prefix != "" {
+			project = c.DockerRepository + "/" + prefix + "-" + app
+		} else {
+			project = c.DockerRepository + "/" + app
+		}
+
+		docker, err := docker.New(c.DockerUsername, c.DockerPassword, project, c.DockerTag, *c.Logging)
+		if err != nil {
+			c.Log().Fatal(err)
+		}
+		if docker.IsDockerImageExist() {
+			c.Log().Infof("Docker container %s with tag %s exist", project, c.DockerTag)
+		} else {
+			log.Errorf("Docker container %s with tag %s exist", project, c.DockerTag)
+		}
 	}
 }
 
 func (c *Checker) predeployK8s() {
-	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.DeploymentFile)
+	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace)
 	if err != nil {
 		c.Log().Fatal(err)
 	}
 	k.PrepareDeployment()
 }
 
-func (c *Checker) predeployChecks() {
-	c.predeployDocker()
+func (c *Checker) predeployChecks(prefix string, apps string) {
+	c.predeployDocker(prefix, strings.Split(apps, ","))
 	c.predeployK8s()
 	c.Log().Info("All checks passed")
 }
