@@ -1,12 +1,13 @@
-FROM golang:onbuild
+FROM golang:alpine as build
 
-RUN mkdir /app
-ADD . /app/
-WORKDIR /app
+WORKDIR $GOPATH/src/github.com/foxdalas/deploy-checker
+COPY . .
+
+RUN apk --no-cache add git
 RUN go get -u github.com/golang/dep/cmd/dep
-RUN dep ensure --vendor-only -v
-RUN go build -o deploy-checker .
-RUN ls | grep -v deploy-checker | xargs rm -rf
-RUN rm -rf /go/src
+RUN dep check || dep ensure --vendor-only -v
+RUN go build -o /go/bin/deploy-checker .
 
-ENTRYPOINT ["go-wrapper", "run"]
+FROM alpine:3.8
+RUN apk --no-cache add ca-certificates
+COPY --from=build /go/bin/deploy-checker /app/
