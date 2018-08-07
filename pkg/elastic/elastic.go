@@ -27,7 +27,7 @@ func New(checker checker.Checker, elasticHost string) (*elasticSearch, error) {
 		return nil, err
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 1*time.Second) // requests will time out after 1 second
+	ctx, _ := context.WithTimeout(context.Background(), 10 * time.Second)
 
 	return &elasticSearch{
 		checker: checker,
