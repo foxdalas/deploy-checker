@@ -26,7 +26,6 @@ func New(version string, logging *log.Entry) *Checker {
 
 func (c *Checker) Init() {
 	c.Log().Infof("Checker %s starting", c.Ver)
-
 	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace)
 	if err != nil {
 		c.Log().Fatal()

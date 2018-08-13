@@ -20,14 +20,26 @@ import (
 )
 
 func New(checker checker.Checker, kubeconfig string, namespace string) (*k8s, error) {
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		checker.Log().Warnf("failed to create in-cluster client: %v.", err)
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+	var config *rest.Config
+	var err error
+
+	if (os.Getenv("KUBECONFIG_CONTENT") != "") {
+		checker.Log().Info("Using configuration from environment value KUBECONFIG_CONTENT")
+		config, err = clientcmd.RESTConfigFromKubeConfig([]byte(os.Getenv("KUBECONFIG_CONTENT")))
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			checker.Log().Warnf("failed to create in-cluster client: %v.", err)
+			config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
+
 	clientset, err := kubernetes.NewForConfig(config)
 
 	return &k8s{

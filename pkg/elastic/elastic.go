@@ -19,7 +19,7 @@ func New(checker checker.Checker, elasticHost string) (*elasticSearch, error) {
 		elastic.SetSniff(false),
 		elastic.SetRetrier(NewEsRetrier()),
 		elastic.SetHealthcheck(true),
-		elastic.SetHealthcheckTimeout(time.Second * 60),
+		elastic.SetHealthcheckTimeout(time.Second*60),
 		elastic.SetErrorLog(checker.Log()),
 		elastic.SetInfoLog(checker.Log()),
 	)
@@ -27,7 +27,7 @@ func New(checker checker.Checker, elasticHost string) (*elasticSearch, error) {
 		return nil, err
 	}
 
-	ctx, _ := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 
 	return &elasticSearch{
 		checker: checker,
