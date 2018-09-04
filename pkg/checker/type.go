@@ -38,3 +38,11 @@ type Checker struct {
 	StopCh    chan struct{}
 	WaitGroup sync.WaitGroup
 }
+
+type rollbarData struct {
+	AccessToken   string `json:"access_token"`
+	Environment   string `json:"environment"`
+	Revision      string `json:"revision"`
+	LocalUsername string `json:"local_username"`
+	Comment       string `json:"comment"`
+}

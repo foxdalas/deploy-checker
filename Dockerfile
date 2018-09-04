@@ -9,5 +9,5 @@ RUN dep check || dep ensure --vendor-only -v
 RUN go build -o /go/bin/deploy-checker .
 
 FROM alpine:3.8
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache add ca-certificates git
 COPY --from=build /go/bin/deploy-checker /app/

@@ -23,7 +23,7 @@ func New(checker checker.Checker, kubeconfig string, namespace string) (*k8s, er
 	var config *rest.Config
 	var err error
 
-	if (os.Getenv("KUBECONFIG_CONTENT") != "") {
+	if os.Getenv("KUBECONFIG_CONTENT") != "" {
 		checker.Log().Info("Using configuration from environment value KUBECONFIG_CONTENT")
 		config, err = clientcmd.RESTConfigFromKubeConfig([]byte(os.Getenv("KUBECONFIG_CONTENT")))
 		if err != nil {

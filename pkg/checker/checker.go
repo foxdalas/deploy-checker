@@ -1,11 +1,14 @@
 package checker
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/foxdalas/deploy-checker/pkg/checker_const"
 	"github.com/foxdalas/deploy-checker/pkg/docker"
 	"github.com/foxdalas/deploy-checker/pkg/elastic"
 	"github.com/foxdalas/deploy-checker/pkg/k8s"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -59,6 +62,9 @@ func (c *Checker) Init() {
 		}
 		c.Log().Info("Waiting for deployment to finish")
 		wg.Wait()
+		if os.Getenv("ROLLBAR_ACCESS_TOKEN") != "" {
+			c.rollbarReport()
+		}
 		c.elasticReport()
 		os.Exit(exitCode)
 	}
@@ -120,4 +126,31 @@ func (c *Checker) elasticReport() {
 		c.Log().Fatal(err)
 	}
 	e.Notify(c.Apps, "deploy_log", c.User, c.KubeNamespace)
+}
+
+func (c *Checker) rollbarReport() {
+
+	data := rollbarData{
+		AccessToken:   os.Getenv("ROLLBAR_ACCESS_TOKEN"),
+		Environment:   c.KubeNamespace,
+		Revision:      os.Getenv("COMMIT_HASH"),
+		LocalUsername: c.User,
+		Comment:       os.Getenv("ROLLBAR_COMMENT"),
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		c.Log().Error(err)
+	}
+
+	req, err := http.NewRequest("POST", "https://api.rollbar.com/api/1/deploy/", bytes.NewBuffer(b))
+	if err != nil {
+		c.Log().Error(err)
+	}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		c.Log().Panic(err)
+	}
+	defer resp.Body.Close()
 }
