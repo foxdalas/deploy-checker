@@ -85,6 +85,10 @@ func params(c *checker.Checker) error {
 		return errors.New("Please provide -apps option")
 	}
 
+	if c.User == "" {
+		c.User = os.Getenv("BUILD_USER")
+	}
+
 	if !c.DeployProgress && !c.Report {
 		if c.DockerRepository == "" {
 			return errors.New("Please provide -repository option")
