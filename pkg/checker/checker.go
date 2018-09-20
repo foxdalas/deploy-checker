@@ -88,21 +88,23 @@ func (c *Checker) Stop() {
 func (c *Checker) predeployDocker(prefix string, apps []string) {
 	var project string
 	for _, app := range apps {
-		if prefix != "" {
-			project = c.DockerRepository + "/" + prefix + "-" + app
-		} else {
-			project = c.DockerRepository + "/" + app
-		}
+		go func(app string){
+			if prefix != "" {
+				project = c.DockerRepository + "/" + prefix + "-" + app
+			} else {
+				project = c.DockerRepository + "/" + app
+			}
 
-		docker, err := docker.New(c.DockerUsername, c.DockerPassword, project, c.DockerTag, *c.Logging)
-		if err != nil {
-			c.Log().Fatal(err)
-		}
-		if docker.IsDockerImageExist() {
-			c.Log().Infof("Docker container %s with tag %s exist", project, c.DockerTag)
-		} else {
-			log.Errorf("Docker container %s with tag %s exist", project, c.DockerTag)
-		}
+			docker, err := docker.New(c.DockerUsername, c.DockerPassword, project, c.DockerTag, *c.Logging)
+			if err != nil {
+				c.Log().Fatal(err)
+			}
+			if docker.IsDockerImageExist() {
+				c.Log().Infof("Docker container %s with tag %s exist", project, c.DockerTag)
+			} else {
+				log.Errorf("Docker container %s with tag %s exist", project, c.DockerTag)
+			}
+		}(app)
 	}
 }
 
