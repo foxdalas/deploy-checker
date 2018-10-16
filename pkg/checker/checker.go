@@ -127,7 +127,7 @@ func (c *Checker) elasticReport() {
 	if err != nil {
 		c.Log().Fatal(err)
 	}
-	e.Notify(c.Apps, "deploy_log", c.User, c.KubeNamespace)
+	e.Notify(c.Apps, "deploy_log", c.User, c.KubeNamespace, c.DockerTag)
 }
 
 func (c *Checker) rollbarReport() {

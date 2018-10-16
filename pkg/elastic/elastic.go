@@ -37,8 +37,8 @@ func New(checker checker.Checker, elasticHost string) (*elasticSearch, error) {
 	}, nil
 }
 
-func (e *elasticSearch) sendDocument(apps string, tags string, user string, namespace string) {
-	msg := fmt.Sprintf("Deploy apps %s in namespace %s", apps, namespace)
+func (e *elasticSearch) sendDocument(apps string, tags string, user string, namespace string, build string) {
+	msg := fmt.Sprintf("Deploy apps %s with build %s in namespace %s", apps, build, namespace)
 	message := &document{
 		Timestamp: time.Now().UTC(),
 		User:      user,
@@ -52,17 +52,17 @@ func (e *elasticSearch) sendDocument(apps string, tags string, user string, name
 	}
 }
 
-func (e *elasticSearch) Notify(apps string, tags string, user string, namespace string) {
+func (e *elasticSearch) Notify(apps string, tags string, user string, namespace string, build string) {
 	exist, err := e.isIndexExist()
 	if err != nil {
 		e.Log().Fatal(err)
 	}
 	if exist {
-		e.sendDocument(apps, tags, user, namespace)
+		e.sendDocument(apps, tags, user, namespace, build)
 	} else {
 		e.Log().Infof("Index %s in not exists", e.index)
 		e.createIndex()
-		e.sendDocument(apps, tags, user, namespace)
+		e.sendDocument(apps, tags, user, namespace, build)
 	}
 }
 
