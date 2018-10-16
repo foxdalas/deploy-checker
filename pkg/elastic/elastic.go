@@ -44,6 +44,7 @@ func (e *elasticSearch) sendDocument(apps string, tags string, user string, name
 		User:      user,
 		Msg:       msg,
 		Tags:      tags,
+		Build:     build,
 	}
 
 	_, err := e.client.Index().Index(e.index).Type("lita").BodyJson(message).Do(e.ctx)
@@ -114,6 +115,15 @@ func (e *elasticSearch) createIndex() {
 						}
 					},
 					"tags": {
+						"type": "text",
+						"fields": {
+							"keyword": {
+								"type": "keyword",
+								"ignore_above": 256
+							}
+						}
+					},
+					"build": {
 						"type": "text",
 						"fields": {
 							"keyword": {

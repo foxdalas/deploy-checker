@@ -23,6 +23,7 @@ type document struct {
 	User      string    `json:"user"`
 	Msg       string    `json:"msg"`
 	Tags      string    `json:"tags"`
+	Build     string    `json:"build"`
 }
 
 type EsRetrier struct {

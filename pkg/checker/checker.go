@@ -88,7 +88,7 @@ func (c *Checker) Stop() {
 func (c *Checker) predeployDocker(prefix string, apps []string) {
 	var project string
 	for _, app := range apps {
-		go func(app string){
+		go func(app string) {
 			if prefix != "" {
 				project = c.DockerRepository + "/" + prefix + "-" + app
 			} else {
