@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/foxdalas/deploy-checker/pkg/checker_const"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
@@ -205,4 +207,54 @@ func (k *k8s) findDeployments(searchDir string) []string {
 	}
 
 	return fileList
+}
+
+func (k *k8s) GetConfigMap(name string, namespace string) (*v1.ConfigMap, error) {
+	return k.client.CoreV1().ConfigMaps(namespace).Get(name, metav1.GetOptions{})
+}
+
+func (k *k8s) SetConfigMap(configmap *v1.ConfigMap, namespace string) (*v1.ConfigMap, error) {
+	return k.client.CoreV1().ConfigMaps(namespace).Update(configmap)
+}
+
+func (k *k8s) GetAlerts(data string) *Alerts {
+	parsed := &Alerts{}
+	err := yaml.Unmarshal([]byte(data), &parsed)
+	if err != nil {
+		k.Log().Error(err)
+	}
+	return parsed
+}
+
+func (k *k8s) GetAlertFromFile(root string) (*[]Group, error) {
+	groups := []Group{}
+	parsed := Group{}
+	var files []string
+
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			return nil
+		}
+		k.Log().Info(path)
+		files = append(files, path)
+
+		return nil
+	})
+	if err != nil {
+		return &groups, err
+	}
+	for _, file := range files {
+		data, err := ioutil.ReadFile(file)
+		if err != nil {
+			return &groups, err
+		}
+
+		err = yaml.Unmarshal(data, &parsed)
+		if err != nil {
+			return &groups, err
+		}
+		groups = append(groups, parsed)
+
+	}
+	return &groups, err
 }

@@ -58,6 +58,7 @@ func makeLog() *log.Entry {
 func params(c *checker.Checker) error {
 	flag.BoolVar(&c.DeployProgress, "processing", false, "Checking kubernetes deploy progress")
 	flag.BoolVar(&c.Report, "report", false, "Send deploy state to elasticsearch")
+	flag.StringVar(&c.DeployMonitoring, "monitoring", "", "Deploy monitoring")
 
 	if home := homedir.HomeDir(); home != "" {
 		flag.StringVar(&c.KubeConfig, "kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -81,7 +82,7 @@ func params(c *checker.Checker) error {
 
 	flag.Parse()
 
-	if c.Apps == "" {
+	if c.Apps == "" && len(c.DeployMonitoring) == 0 {
 		return errors.New("Please provide -apps option")
 	}
 
@@ -89,7 +90,7 @@ func params(c *checker.Checker) error {
 		c.User = os.Getenv("BUILD_USER")
 	}
 
-	if !c.DeployProgress && !c.Report {
+	if !c.DeployProgress && !c.Report && len(c.DeployMonitoring) == 0 {
 		if c.DockerRepository == "" {
 			return errors.New("Please provide -repository option")
 		}
@@ -104,7 +105,7 @@ func params(c *checker.Checker) error {
 			return errors.New("Please provide DOCKER_PASSWORD environment value")
 		}
 	} else {
-		if c.KubeNamespace == "" {
+		if c.KubeNamespace == "" && len(c.DeployMonitoring) == 0 {
 			return errors.New("Please provide -namespace option")
 		}
 	}

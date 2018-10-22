@@ -20,6 +20,26 @@ type k8s struct {
 	yamlDeployment *v1beta1.Deployment
 }
 
+type Alerts struct {
+	Groups []Group
+}
+
+type Group struct {
+	Name  string `yaml:"name"`
+	Rules []struct {
+		Alert       string `yaml:"alert"`
+		Annotations struct {
+			Description string `yaml:"description"`
+			Summary     string `yaml:"summary"`
+		} `yaml:"annotations"`
+		Expr   string `yaml:"expr"`
+		For    string `yaml:"for"`
+		Labels struct {
+			Severity string `yaml:"severity"`
+		} `yaml:"labels"`
+	} `yaml:"rules"`
+}
+
 const (
 	// RevisionAnnotation is the revision annotation of a deployment's replica sets which records its rollout sequence
 	RevisionAnnotation = "deployment.kubernetes.io/revision"

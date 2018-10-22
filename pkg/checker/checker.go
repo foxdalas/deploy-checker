@@ -7,6 +7,7 @@ import (
 	"github.com/foxdalas/deploy-checker/pkg/docker"
 	"github.com/foxdalas/deploy-checker/pkg/elastic"
 	"github.com/foxdalas/deploy-checker/pkg/k8s"
+	"github.com/ghodss/yaml"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
@@ -68,7 +69,13 @@ func (c *Checker) Init() {
 		c.elasticReport()
 		os.Exit(exitCode)
 	}
-	c.predeployChecks(c.Prefix, c.Apps)
+	if len(c.DeployMonitoring) == 0 {
+		c.predeployChecks(c.Prefix, c.Apps)
+	} else {
+		c.Log().Info("Monitoring deploy mode")
+		c.monitoringK8s()
+	}
+
 }
 
 func (c *Checker) Log() *log.Entry {
@@ -114,6 +121,42 @@ func (c *Checker) predeployK8s() {
 		c.Log().Fatal(err)
 	}
 	k.PrepareDeployment()
+}
+
+func (c *Checker) monitoringK8s() {
+	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace)
+	if err != nil {
+		c.Log().Fatal(err)
+	}
+
+	repoAlert, err := k.GetAlertFromFile(c.DeployMonitoring)
+	if err != nil {
+		c.Log().Fatalf("Problem in repo file: %s", err)
+	}
+
+	configmap, err := k.GetConfigMap("prometheus-server", "kube-system")
+	data := k.GetAlerts(configmap.Data["alerts"])
+
+	for _,group := range *repoAlert {
+		for k, v := range data.Groups {
+			if v.Name == group.Name {
+				c.Log().Infof("Alerts for %s is already exist. Deleting", group.Name)
+				data.Groups = append(data.Groups[:k], data.Groups[k+1:]...)
+			}
+		}
+		data.Groups = append(data.Groups, group)
+	}
+	binaryData, err := yaml.Marshal(data)
+	if err != nil {
+		c.Log().Error(err)
+	}
+
+	configmap.Data["alerts"] = string(binaryData)
+	c.Log().Info("Uploading alerts")
+	_, err = k.SetConfigMap(configmap, "kube-system")
+	if err != nil {
+		c.Log().Fatal(err)
+	}
 }
 
 func (c *Checker) predeployChecks(prefix string, apps string) {
