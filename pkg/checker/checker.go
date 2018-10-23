@@ -7,14 +7,16 @@ import (
 	"github.com/foxdalas/deploy-checker/pkg/docker"
 	"github.com/foxdalas/deploy-checker/pkg/elastic"
 	"github.com/foxdalas/deploy-checker/pkg/k8s"
-	"github.com/ghodss/yaml"
+	"gopkg.in/yaml.v2"
 	log "github.com/sirupsen/logrus"
+	"k8s.io/api/core/v1"
 	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 )
 
 var _ checker.Checker = &Checker{}
@@ -67,15 +69,15 @@ func (c *Checker) Init() {
 			c.rollbarReport()
 		}
 		c.elasticReport()
+		if _, err := os.Stat(c.DeployMonitoring); !os.IsNotExist(err) {
+			c.monitoringK8s()
+		} else {
+			c.Log().Warnf("Directory %s is not exist.", c.DeployMonitoring)
+		}
 		os.Exit(exitCode)
 	}
-	if len(c.DeployMonitoring) == 0 {
-		c.predeployChecks(c.Prefix, c.Apps)
-	} else {
-		c.Log().Info("Monitoring deploy mode")
-		c.monitoringK8s()
-	}
 
+	c.predeployChecks(c.Prefix, c.Apps)
 }
 
 func (c *Checker) Log() *log.Entry {
@@ -134,10 +136,33 @@ func (c *Checker) monitoringK8s() {
 		c.Log().Fatalf("Problem in repo file: %s", err)
 	}
 
-	configmap, err := k.GetConfigMap("prometheus-server", "kube-system")
+	c.Log().Info("Getting current configmap")
+	configmap, err := k.GetConfigMap("prometheus-aviasales", "kube-system")
+	t := time.Now().Format("20060102150405")
+
+	backup := &v1.ConfigMap{}
+	b, err :=  json.Marshal(configmap)
+	if err != nil {
+		c.Log().Fatal(err)
+	}
+
+	err = json.Unmarshal(b, backup)
+	if err != nil {
+		c.Log().Fatal(err)
+	}
+
+	backup.Name = "prometheus-aviasales-"+t
+	backup.ResourceVersion = "0"
+	backup.UID = ""
+
+	k.Log().Infof("Creating backup %s", backup.Name)
+	_, err = k.CreateConfigMap(backup,"kube-system")
+	if err != nil {
+		c.Log().Fatal(err)
+	}
 	data := k.GetAlerts(configmap.Data["alerts"])
 
-	for _,group := range *repoAlert {
+	for _,group := range repoAlert {
 		for k, v := range data.Groups {
 			if v.Name == group.Name {
 				c.Log().Infof("Alerts for %s is already exist. Deleting", group.Name)
@@ -150,9 +175,8 @@ func (c *Checker) monitoringK8s() {
 	if err != nil {
 		c.Log().Error(err)
 	}
-
 	configmap.Data["alerts"] = string(binaryData)
-	c.Log().Info("Uploading alerts")
+	c.Log().Infof("Uploading alerts to configmap %s", configmap.Name)
 	_, err = k.SetConfigMap(configmap, "kube-system")
 	if err != nil {
 		c.Log().Fatal(err)

@@ -21,7 +21,7 @@ type k8s struct {
 }
 
 type Alerts struct {
-	Groups []Group
+	Groups []Group `yaml:"groups"`
 }
 
 type Group struct {

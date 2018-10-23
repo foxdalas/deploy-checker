@@ -58,7 +58,7 @@ func makeLog() *log.Entry {
 func params(c *checker.Checker) error {
 	flag.BoolVar(&c.DeployProgress, "processing", false, "Checking kubernetes deploy progress")
 	flag.BoolVar(&c.Report, "report", false, "Send deploy state to elasticsearch")
-	flag.StringVar(&c.DeployMonitoring, "monitoring", "", "Deploy monitoring")
+	flag.StringVar(&c.DeployMonitoring, "monitoring", "monitoring", "Deploy monitoring")
 
 	if home := homedir.HomeDir(); home != "" {
 		flag.StringVar(&c.KubeConfig, "kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
