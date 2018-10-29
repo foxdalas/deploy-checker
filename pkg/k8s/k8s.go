@@ -230,8 +230,8 @@ func (k *k8s) GetAlerts(data string) *Alerts {
 	return parsed
 }
 
-func (k *k8s) GetAlertFromFile(root string) ([]Group, error) {
-	groups := []Group{}
+func (k *k8s) GetAlertFromFile(root string) (AlertFile, error) {
+	alertsData := AlertFile{}
 
 	var files []string
 
@@ -245,21 +245,24 @@ func (k *k8s) GetAlertFromFile(root string) ([]Group, error) {
 		return nil
 	})
 	if err != nil {
-		return groups, err
+		return alertsData, err
 	}
 	for _, file := range files {
-		parsed := Group{}
+		parsed := AlertFile{}
 		data, err := ioutil.ReadFile(file)
 		if err != nil {
-			return groups, err
+			return alertsData, err
 		}
 
 		err = yaml.Unmarshal(data, &parsed)
 		if err != nil {
-			return groups, err
+			return alertsData, err
 		}
-		groups = append(groups, parsed)
+
+		for _, group := range parsed.Groups {
+			alertsData.Groups = append(alertsData.Groups, group)
+		}
 
 	}
-	return groups, err
+	return alertsData, err
 }

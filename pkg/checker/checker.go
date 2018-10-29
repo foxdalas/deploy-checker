@@ -162,7 +162,7 @@ func (c *Checker) monitoringK8s() {
 	}
 	data := k.GetAlerts(configmap.Data["alerts"])
 
-	for _,group := range repoAlert {
+	for _,group := range repoAlert.Groups {
 		for k, v := range data.Groups {
 			if v.Name == group.Name {
 				c.Log().Infof("Alerts for %s is already exist. Deleting", group.Name)
