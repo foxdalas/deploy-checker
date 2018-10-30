@@ -239,8 +239,10 @@ func (k *k8s) GetAlertFromFile(root string) (AlertFile, error) {
 		if info.IsDir() {
 			return nil
 		}
-		k.Log().Info(path)
-		files = append(files, path)
+		if filepath.Ext(path) == ".yml" {
+			k.Log().Info(path)
+			files = append(files, path)
+		}
 
 		return nil
 	})

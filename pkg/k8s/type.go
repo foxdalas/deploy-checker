@@ -24,7 +24,7 @@ type Alerts struct {
 	Groups []Group `yaml:"groups"`
 }
 
-type AlertFile  struct {
+type AlertFile struct {
 	Groups []Group `yaml:"groups"`
 }
 

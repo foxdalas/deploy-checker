@@ -7,8 +7,8 @@ import (
 	"github.com/foxdalas/deploy-checker/pkg/docker"
 	"github.com/foxdalas/deploy-checker/pkg/elastic"
 	"github.com/foxdalas/deploy-checker/pkg/k8s"
-	"gopkg.in/yaml.v2"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
 	"k8s.io/api/core/v1"
 	"net/http"
 	"os"
@@ -50,7 +50,7 @@ func (c *Checker) Init() {
 	if c.DeployProgress {
 		return
 	}
-	if c.Report {
+	if c.Report && !c.MonitoringOnly {
 		var wg sync.WaitGroup
 		exitCode := 0
 		for _, app := range strings.Split(c.Apps, ",") {
@@ -69,12 +69,17 @@ func (c *Checker) Init() {
 			c.rollbarReport()
 		}
 		c.elasticReport()
-		if _, err := os.Stat(c.DeployMonitoring); !os.IsNotExist(err) {
+		if _, err := os.Stat(c.MonitoringRules); !os.IsNotExist(err) {
 			c.monitoringK8s()
 		} else {
-			c.Log().Warnf("Directory %s is not exist.", c.DeployMonitoring)
+			c.Log().Warnf("Directory %s is not exist.", c.MonitoringRules)
 		}
 		os.Exit(exitCode)
+	}
+
+	if c.MonitoringOnly {
+		c.monitoringK8s()
+		return
 	}
 
 	c.predeployChecks(c.Prefix, c.Apps)
@@ -131,7 +136,7 @@ func (c *Checker) monitoringK8s() {
 		c.Log().Fatal(err)
 	}
 
-	repoAlert, err := k.GetAlertFromFile(c.DeployMonitoring)
+	repoAlert, err := k.GetAlertFromFile(c.MonitoringRules)
 	if err != nil {
 		c.Log().Fatalf("Problem in repo file: %s", err)
 	}
@@ -141,7 +146,7 @@ func (c *Checker) monitoringK8s() {
 	t := time.Now().Format("20060102150405")
 
 	backup := &v1.ConfigMap{}
-	b, err :=  json.Marshal(configmap)
+	b, err := json.Marshal(configmap)
 	if err != nil {
 		c.Log().Fatal(err)
 	}
@@ -151,18 +156,20 @@ func (c *Checker) monitoringK8s() {
 		c.Log().Fatal(err)
 	}
 
-	backup.Name = "prometheus-aviasales-"+t
+	backup.Name = "prometheus-aviasales-" + t
 	backup.ResourceVersion = "0"
 	backup.UID = ""
 
 	k.Log().Infof("Creating backup %s", backup.Name)
-	_, err = k.CreateConfigMap(backup,"kube-system")
+	_, err = k.CreateConfigMap(backup, "kube-system")
 	if err != nil {
 		c.Log().Fatal(err)
 	}
 	data := k.GetAlerts(configmap.Data["alerts"])
 
-	for _,group := range repoAlert.Groups {
+	c.Log().Info("Merging configmaps")
+	for _, group := range repoAlert.Groups {
+		c.Log().Infof("Procesing group name %s", group.Name)
 		for k, v := range data.Groups {
 			if v.Name == group.Name {
 				c.Log().Infof("Alerts for %s is already exist. Deleting", group.Name)
