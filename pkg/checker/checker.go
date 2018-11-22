@@ -68,7 +68,10 @@ func (c *Checker) Init() {
 		if os.Getenv("ROLLBAR_ACCESS_TOKEN") != "" {
 			c.rollbarReport()
 		}
-		c.elasticReport()
+		err = c.elasticReport()
+		if err != nil {
+			exitCode = 2
+		}
 		if _, err := os.Stat(c.MonitoringRules); !os.IsNotExist(err) {
 			c.monitoringK8s()
 		} else {
@@ -196,12 +199,14 @@ func (c *Checker) predeployChecks(prefix string, apps string) {
 	c.Log().Info("All checks passed")
 }
 
-func (c *Checker) elasticReport() {
+func (c *Checker) elasticReport() error {
 	e, err := elastic.New(c, c.ElasticSearchURL)
 	if err != nil {
-		c.Log().Fatal(err)
+		c.Log().Error(err)
+		return err
 	}
 	e.Notify(c.Apps, "deploy_log", c.User, c.KubeNamespace, c.DockerTag)
+	return nil
 }
 
 func (c *Checker) rollbarReport() {
