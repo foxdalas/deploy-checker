@@ -166,7 +166,7 @@ func (c *Checker) monitoringK8s() {
 	k.Log().Infof("Creating backup %s", backup.Name)
 	_, err = k.CreateConfigMap(backup, "kube-system")
 	if err != nil {
-		c.Log().Fatal(err)
+		c.Log().Warn(err)
 	}
 	data := k.GetAlerts(configmap.Data["alerts"])
 
