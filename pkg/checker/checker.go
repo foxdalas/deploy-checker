@@ -145,7 +145,7 @@ func (c *Checker) monitoringK8s() {
 	}
 
 	c.Log().Info("Getting current configmap")
-	configmap, err := k.GetConfigMap("prometheus-aviasales", "kube-system")
+	configmap, err := k.GetConfigMap("prometheus-aviasales", "prometheus")
 	t := time.Now().Format("20060102150405")
 
 	backup := &v1.ConfigMap{}
@@ -164,7 +164,7 @@ func (c *Checker) monitoringK8s() {
 	backup.UID = ""
 
 	k.Log().Infof("Creating backup %s", backup.Name)
-	_, err = k.CreateConfigMap(backup, "kube-system")
+	_, err = k.CreateConfigMap(backup, "prometheus")
 	if err != nil {
 		c.Log().Warn(err)
 	}
@@ -187,7 +187,7 @@ func (c *Checker) monitoringK8s() {
 	}
 	configmap.Data["alerts"] = string(binaryData)
 	c.Log().Infof("Uploading alerts to configmap %s", configmap.Name)
-	_, err = k.SetConfigMap(configmap, "kube-system")
+	_, err = k.SetConfigMap(configmap, "prometheus")
 	if err != nil {
 		c.Log().Fatal(err)
 	}
