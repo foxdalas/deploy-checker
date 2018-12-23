@@ -213,7 +213,7 @@ func (c *Checker) rollbarReport() {
 
 	data := rollbarData{
 		AccessToken:   os.Getenv("ROLLBAR_ACCESS_TOKEN"),
-		Environment:   c.KubeNamespace,
+		Environment:   os.Getenv("DATACENTER"),
 		Revision:      os.Getenv("COMMIT_HASH"),
 		LocalUsername: c.User,
 		Comment:       os.Getenv("ROLLBAR_COMMENT"),
