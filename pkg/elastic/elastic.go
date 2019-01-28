@@ -47,7 +47,7 @@ func (e *elasticSearch) sendDocument(apps string, tags string, user string, name
 		Build:     build,
 	}
 
-	_, err := e.client.Index().Index(e.index).Type("lita").BodyJson(message).Do(e.ctx)
+	_, err := e.client.Index().Index(e.index).Type("doc").BodyJson(message).Do(e.ctx)
 	if err != nil {
 		e.Log().Error(err)
 	}
@@ -98,61 +98,61 @@ func (e *elasticSearch) Log() *log.Entry {
 }
 
 func (e *elasticSearch) createIndex() {
-	mapping := `{
-		"mappings": {
-			"lita": {
-				"properties": {
-					"@timestamp": {
-						"type": "date"
-					},
-					"msg": {
-						"type": "text",
-						"fields": {
-							"keyword": {
-								"type": "keyword",
-								"ignore_above": 256
-							}
-						}
-					},
-					"tags": {
-						"type": "text",
-						"fields": {
-							"keyword": {
-								"type": "keyword",
-								"ignore_above": 256
-							}
-						}
-					},
-					"build": {
-						"type": "text",
-						"fields": {
-							"keyword": {
-								"type": "keyword",
-								"ignore_above": 256
-							}
-						}
-					},
-					"timestamp": {
-						"type": "long"
-					},
-					"user": {
-						"type": "text",
-						"fields": {
-							"keyword": {
-								"type": "keyword",
-								"ignore_above": 256
-							}
-						}
-					}
-				}
-			}
-		}
-	}`
-	createIndex, err := e.client.CreateIndex(e.index).BodyString(mapping).Do(e.ctx)
-	if err != nil {
-		e.Log().Fatal(err)
-	}
-	if createIndex.Acknowledged {
-		e.Log().Infof("Create index %s done", e.index)
-	}
+	//mapping := `{
+	//	"mappings": {
+	//		"doc": {
+	//			"properties": {
+	//				"@timestamp": {
+	//					"type": "date"
+	//				},
+	//				"msg": {
+	//					"type": "text",
+	//					"fields": {
+	//						"keyword": {
+	//							"type": "keyword",
+	//							"ignore_above": 256
+	//						}
+	//					}
+	//				},
+	//				"tags": {
+	//					"type": "text",
+	//					"fields": {
+	//						"keyword": {
+	//							"type": "keyword",
+	//							"ignore_above": 256
+	//						}
+	//					}
+	//				},
+	//				"build": {
+	//					"type": "text",
+	//					"fields": {
+	//						"keyword": {
+	//							"type": "keyword",
+	//							"ignore_above": 256
+	//						}
+	//					}
+	//				},
+	//				"timestamp": {
+	//					"type": "long"
+	//				},
+	//				"user": {
+	//					"type": "text",
+	//					"fields": {
+	//						"keyword": {
+	//							"type": "keyword",
+	//							"ignore_above": 256
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}`
+	//createIndex, err := e.client.CreateIndex(e.index).BodyString("{}").Do(e.ctx)
+	//if err != nil {
+	//	e.Log().Fatal(err)
+	//}
+	//if createIndex.Acknowledged {
+	//	e.Log().Infof("Create index %s done", e.index)
+	//}
 }

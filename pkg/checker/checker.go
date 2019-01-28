@@ -16,7 +16,6 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-	"time"
 )
 
 var _ checker.Checker = &Checker{}
@@ -146,7 +145,6 @@ func (c *Checker) monitoringK8s() {
 
 	c.Log().Info("Getting current configmap")
 	configmap, err := k.GetConfigMap("prometheus-aviasales", "prometheus")
-	t := time.Now().Format("20060102150405")
 
 	backup := &v1.ConfigMap{}
 	b, err := json.Marshal(configmap)
