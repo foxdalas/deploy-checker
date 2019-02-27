@@ -31,7 +31,7 @@ func New(version string, logging *log.Entry) *Checker {
 
 func (c *Checker) Init() {
 	c.Log().Infof("Checker %s starting", c.Ver)
-	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace)
+	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
 	if err != nil {
 		c.Log().Fatal()
 	}
@@ -125,7 +125,7 @@ func (c *Checker) predeployDocker(prefix string, apps []string) {
 }
 
 func (c *Checker) predeployK8s() {
-	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace)
+	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
 	if err != nil {
 		c.Log().Fatal(err)
 	}
@@ -133,7 +133,7 @@ func (c *Checker) predeployK8s() {
 }
 
 func (c *Checker) monitoringK8s() {
-	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace)
+	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
 	if err != nil {
 		c.Log().Fatal(err)
 	}

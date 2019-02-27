@@ -59,7 +59,9 @@ func params(c *checker.Checker) error {
 	flag.BoolVar(&c.DeployProgress, "processing", false, "Checking kubernetes deploy progress")
 	flag.BoolVar(&c.Report, "report", false, "Send deploy state to elasticsearch")
 	flag.StringVar(&c.MonitoringRules, "monitoring", "monitoring", "Deploy monitoring")
-	flag.BoolVar(&c.MonitoringOnly, "mon-only", false, "OOnly upload alert rules")
+	flag.BoolVar(&c.MonitoringOnly, "mon-only", false, "Only upload alert rules")
+
+	flag.BoolVar(&c.Development, "development", false, "Change deployment for development environment. Cleanup resources, nodeSelector...")
 
 	if home := homedir.HomeDir(); home != "" {
 		flag.StringVar(&c.KubeConfig, "kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")

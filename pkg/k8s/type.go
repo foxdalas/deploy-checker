@@ -18,6 +18,7 @@ type k8s struct {
 
 	k8sDeployment  *v1beta1.Deployment
 	yamlDeployment *v1beta1.Deployment
+	development bool
 }
 
 type Alerts struct {

@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-func New(checker checker.Checker, kubeconfig string, namespace string) (*k8s, error) {
+func New(checker checker.Checker, kubeconfig string, namespace string, development bool) (*k8s, error) {
 	var config *rest.Config
 	var err error
 
@@ -89,12 +89,17 @@ func (k *k8s) getDeploymentFile(path string) {
 	}
 }
 
-func (k *k8s) updateDeploymentFile(path string) {
+func (k *k8s) updateDeploymentFile(path string, cleanResources bool) {
 	if *k.k8sDeployment.Spec.Replicas != *k.yamlDeployment.Spec.Replicas {
 		k.Log().Infof("Current deployment is changed. Replicas in repository %d and %d replicas in k8s", *k.yamlDeployment.Spec.Replicas,
 			*k.k8sDeployment.Spec.Replicas)
 	} else {
 		return
+	}
+
+	//Cleanup resources for development environment
+	if cleanResources {
+		k.cleanupResources()
 	}
 
 	//Fix replicas
@@ -114,13 +119,26 @@ func (k *k8s) updateDeploymentFile(path string) {
 	}
 }
 
+func (k *k8s) cleanupResources() {
+	var containers []v1.Container
+
+	for _, c := range k.yamlDeployment.Spec.Template.Spec.Containers {
+		c.Resources.Requests = nil
+		c.Resources.Limits = nil
+
+		containers = append(containers, c)
+	}
+	k.yamlDeployment.Spec.Template.Spec.Containers = containers
+}
+
+
 func (k *k8s) PrepareDeployment() {
 	for _, path := range k.findDeployments(".") {
 		k.getDeploymentFile(path)
 
 		if k.isDeploymentExist(k.yamlDeployment.Name) {
 			k.k8sDeployment = k.getKubernetesDeployment(k.yamlDeployment.Name)
-			k.updateDeploymentFile(path)
+			k.updateDeploymentFile(path, k.development)
 		} else {
 			k.Log().Infof("Deployment not found in kubernetes. Is a new deploy %s", k.yamlDeployment.Name)
 		}
