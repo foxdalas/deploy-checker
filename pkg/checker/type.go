@@ -23,7 +23,7 @@ type Checker struct {
 	KubeNamespace string
 
 	//ElasticSearch
-	ElasticSearchURL string
+	ElasticSearchURL []string
 
 	Apps   string
 	Prefix string

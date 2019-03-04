@@ -62,7 +62,6 @@ func (e *elasticSearch) Notify(apps string, tags string, user string, namespace 
 		e.sendDocument(apps, tags, user, namespace, build)
 	} else {
 		e.Log().Infof("Index %s in not exists", e.index)
-		e.createIndex()
 		e.sendDocument(apps, tags, user, namespace, build)
 	}
 }
@@ -95,64 +94,4 @@ func (e *elasticSearch) isIndexExist() (bool, error) {
 
 func (e *elasticSearch) Log() *log.Entry {
 	return e.checker.Log().WithField("context", "elasticsearch")
-}
-
-func (e *elasticSearch) createIndex() {
-	//mapping := `{
-	//	"mappings": {
-	//		"doc": {
-	//			"properties": {
-	//				"@timestamp": {
-	//					"type": "date"
-	//				},
-	//				"msg": {
-	//					"type": "text",
-	//					"fields": {
-	//						"keyword": {
-	//							"type": "keyword",
-	//							"ignore_above": 256
-	//						}
-	//					}
-	//				},
-	//				"tags": {
-	//					"type": "text",
-	//					"fields": {
-	//						"keyword": {
-	//							"type": "keyword",
-	//							"ignore_above": 256
-	//						}
-	//					}
-	//				},
-	//				"build": {
-	//					"type": "text",
-	//					"fields": {
-	//						"keyword": {
-	//							"type": "keyword",
-	//							"ignore_above": 256
-	//						}
-	//					}
-	//				},
-	//				"timestamp": {
-	//					"type": "long"
-	//				},
-	//				"user": {
-	//					"type": "text",
-	//					"fields": {
-	//						"keyword": {
-	//							"type": "keyword",
-	//							"ignore_above": 256
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-	//}`
-	//createIndex, err := e.client.CreateIndex(e.index).BodyString("{}").Do(e.ctx)
-	//if err != nil {
-	//	e.Log().Fatal(err)
-	//}
-	//if createIndex.Acknowledged {
-	//	e.Log().Infof("Create index %s done", e.index)
-	//}
 }

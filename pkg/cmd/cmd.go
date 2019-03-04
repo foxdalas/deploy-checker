@@ -81,7 +81,7 @@ func params(c *checker.Checker) error {
 	c.DockerUsername = os.Getenv("DOCKER_USERNAME")
 	c.DockerPassword = os.Getenv("DOCKER_PASSWORD")
 
-	c.ElasticSearchURL = os.Getenv("ELASTICSEARCH_URL")
+	c.ElasticSearchURL = strings.Split(os.Getenv("ELASTICSEARCH_URL"), ",")
 
 	flag.Parse()
 
