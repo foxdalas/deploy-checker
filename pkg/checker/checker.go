@@ -129,7 +129,8 @@ func (c *Checker) predeployK8s() {
 	if err != nil {
 		c.Log().Fatal(err)
 	}
-	k.PrepareDeployment()
+	c.Log().Info("Starting pre deploy check")
+	k.PrepareDeployment(c.Development)
 }
 
 func (c *Checker) monitoringK8s() {
