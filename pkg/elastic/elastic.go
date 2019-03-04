@@ -12,10 +12,10 @@ import (
 	"time"
 )
 
-func New(checker checker.Checker, elasticHost string) (*elasticSearch, error) {
+func New(checker checker.Checker, elasticHost []string) (*elasticSearch, error) {
 
 	client, err := elastic.NewClient(
-		elastic.SetURL(elasticHost),
+		elastic.SetURL(elasticHost...),
 		elastic.SetSniff(false),
 		elastic.SetRetrier(NewEsRetrier()),
 		elastic.SetHealthcheck(true),

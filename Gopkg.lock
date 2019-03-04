@@ -149,7 +149,7 @@
   version = "1.0.1"
 
 [[projects]]
-  digest = "1:535f28c24f84c187a1927e52e4a6b265de6ec544651e5cc2e8153d19cb729cab"
+  digest = "1:d1da5ee400cc3c39cf7d920c2db4b04d9407e24a917bf8b99a183aa024081871"
   name = "github.com/olivere/elastic"
   packages = [
     ".",
@@ -157,8 +157,8 @@
     "uritemplates",
   ]
   pruneopts = "UT"
-  revision = "e3492b022a109ac0e52a6d42d5bfb835050fa7f4"
-  version = "v6.1.27"
+  revision = "407a1d940dcc89e279c579eb393d0bdde8fd9ac4"
+  version = "v6.2.16"
 
 [[projects]]
   digest = "1:ee4d4af67d93cc7644157882329023ce9a7bcfce956a079069a9405521c7cc8d"
@@ -447,6 +447,8 @@
     "github.com/olivere/elastic",
     "github.com/sirupsen/logrus",
     "golang.org/x/net/context",
+    "gopkg.in/yaml.v2",
+    "k8s.io/api/core/v1",
     "k8s.io/api/extensions/v1beta1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/runtime/serializer/json",
