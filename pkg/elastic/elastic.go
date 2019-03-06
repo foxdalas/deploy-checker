@@ -8,6 +8,8 @@ import (
 	"github.com/olivere/elastic"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"os"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -40,11 +42,13 @@ func New(checker checker.Checker, elasticHost []string) (*elasticSearch, error) 
 func (e *elasticSearch) sendDocument(apps string, tags string, user string, namespace string, build string) {
 	msg := fmt.Sprintf("Deploy apps %s with build %s in namespace %s", apps, build, namespace)
 	message := &document{
-		Timestamp: time.Now().UTC(),
-		User:      user,
-		Msg:       msg,
-		Tags:      tags,
-		Build:     build,
+		Timestamp:  time.Now().UTC(),
+		User:       user,
+		Msg:        msg,
+		Tags:       tags,
+		Build:      build,
+		Datacenter: os.Getenv("DATACENTER"),
+		Apps:       strings.Split(apps, ","),
 	}
 
 	_, err := e.client.Index().Index(e.index).Type("doc").BodyJson(message).Do(e.ctx)
@@ -54,16 +58,7 @@ func (e *elasticSearch) sendDocument(apps string, tags string, user string, name
 }
 
 func (e *elasticSearch) Notify(apps string, tags string, user string, namespace string, build string) {
-	exist, err := e.isIndexExist()
-	if err != nil {
-		e.Log().Fatal(err)
-	}
-	if exist {
-		e.sendDocument(apps, tags, user, namespace, build)
-	} else {
-		e.Log().Infof("Index %s in not exists", e.index)
-		e.sendDocument(apps, tags, user, namespace, build)
-	}
+	e.sendDocument(apps, tags, user, namespace, build)
 }
 
 func NewEsRetrier() *EsRetrier {

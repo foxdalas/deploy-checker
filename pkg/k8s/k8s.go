@@ -100,7 +100,6 @@ func (k *k8s) updateDeploymentFile(path string) {
 	k.writeDeploymentFile(path)
 }
 
-
 func (k *k8s) cleanupResources() {
 	k.Log().Info("Cleanup deployment for development environment")
 	var containers []v1.Container
@@ -128,12 +127,11 @@ func (k *k8s) prepareDeploymentForDevelopement(path string) {
 	k.writeDeploymentFile(path)
 }
 
-
 func (k *k8s) PrepareDeployment(development bool) {
 	for _, path := range k.findDeployments(".") {
 		k.getDeploymentFile(path)
 
-		if (development) {
+		if development {
 			k.prepareDeploymentForDevelopement(path)
 		}
 
@@ -267,5 +265,3 @@ func (k *k8s) GetAlertFromFile(root string) (AlertFile, error) {
 	}
 	return alertsData, err
 }
-
-

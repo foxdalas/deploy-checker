@@ -34,7 +34,7 @@ type Checker struct {
 
 	DeployProgress  bool
 	Report          bool
-	Development bool
+	Development     bool
 	MonitoringRules string
 	MonitoringOnly  bool
 

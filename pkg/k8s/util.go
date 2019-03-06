@@ -1,12 +1,11 @@
 package k8s
 
 import (
+	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	"os"
 	"path/filepath"
 	"strings"
-	log "github.com/sirupsen/logrus"
-
 )
 
 func (k *k8s) findDeployments(searchDir string) []string {

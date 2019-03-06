@@ -19,11 +19,13 @@ type elasticSearch struct {
 }
 
 type document struct {
-	Timestamp time.Time `json:"@timestamp"`
-	User      string    `json:"user"`
-	Msg       string    `json:"msg"`
-	Tags      string    `json:"tags"`
-	Build     string    `json:"build"`
+	Timestamp  time.Time `json:"@timestamp"`
+	User       string    `json:"user"`
+	Msg        string    `json:"msg"`
+	Tags       string    `json:"tags"`
+	Build      string    `json:"build"`
+	Datacenter string    `json:"datacenter"`
+	Apps       []string  `json:"apps"`
 }
 
 type EsRetrier struct {
