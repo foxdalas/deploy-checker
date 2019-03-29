@@ -72,7 +72,9 @@ func (c *Checker) Init() {
 			exitCode = 2
 		}
 		if _, err := os.Stat(c.MonitoringRules); !os.IsNotExist(err) {
-			c.monitoringK8s()
+			if !c.Development {
+				c.monitoringK8s()
+			}
 		} else {
 			c.Log().Warnf("Directory %s is not exist.", c.MonitoringRules)
 		}
@@ -158,15 +160,6 @@ func (c *Checker) monitoringK8s() {
 		c.Log().Fatal(err)
 	}
 
-	//backup.Name = "prometheus-aviasales-" + t
-	//backup.ResourceVersion = "0"
-	//backup.UID = ""
-
-	//k.Log().Infof("Creating backup %s", backup.Name)
-	//_, err = k.CreateConfigMap(backup, "prometheus")
-	//if err != nil {
-	//	c.Log().Warn(err)
-	//}
 	data := k.GetAlerts(configmap.Data["alerts"])
 
 	c.Log().Info("Merging configmaps")
