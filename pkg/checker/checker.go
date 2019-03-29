@@ -186,7 +186,9 @@ func (c *Checker) monitoringK8s() {
 }
 
 func (c *Checker) predeployChecks(prefix string, apps string) {
-	c.predeployDocker(prefix, strings.Split(apps, ","))
+	if !c.SkipCheckImage {
+		c.predeployDocker(prefix, strings.Split(apps, ","))
+	}
 	c.predeployK8s()
 	c.Log().Info("All checks passed")
 }

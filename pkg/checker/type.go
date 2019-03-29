@@ -17,6 +17,7 @@ type Checker struct {
 	DockerTag        string
 	DockerUsername   string
 	DockerPassword   string
+	SkipCheckImage	 bool
 
 	//K8S
 	KubeConfig    string
