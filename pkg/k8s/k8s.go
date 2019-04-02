@@ -3,6 +3,7 @@ package k8s
 import (
 	"fmt"
 	"github.com/foxdalas/deploy-checker/pkg/checker_const"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"k8s.io/api/core/v1"
@@ -14,6 +15,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
@@ -127,7 +129,8 @@ func (k *k8s) prepareDeploymentForDevelopement(path string) {
 	k.writeDeploymentFile(path)
 }
 
-func (k *k8s) PrepareDeployment(development bool) {
+func (k *k8s) PrepareDeployment(development bool, dockerRepo string) []string {
+	var images []string
 	for _, path := range k.findDeployments(".") {
 		k.getDeploymentFile(path)
 
@@ -141,7 +144,13 @@ func (k *k8s) PrepareDeployment(development bool) {
 		} else {
 			k.Log().Infof("Deployment not found in kubernetes. Is a new deploy %s", k.yamlDeployment.Name)
 		}
+		image, err := k.getImages(dockerRepo)
+		if err != nil {
+			k.Log().Error(err)
+		}
+		images = append(images, image)
 	}
+	return images
 }
 
 func (k *k8s) DeploymentProgress(deployment *v1beta1.Deployment) v1beta1.DeploymentConditionType {
@@ -264,4 +273,13 @@ func (k *k8s) GetAlertFromFile(root string) (AlertFile, error) {
 
 	}
 	return alertsData, err
+}
+
+func (k *k8s) getImages(repo string) (string, error) {
+	for _, container := range k.yamlDeployment.Spec.Template.Spec.Containers {
+		if (strings.Split(container.Image, "/")[0] == repo) {
+			return strings.Split(container.Image, ":")[0], nil
+		}
+	}
+	return "", errors.New("Image does not exist in deployment file")
 }

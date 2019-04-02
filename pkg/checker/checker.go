@@ -103,36 +103,35 @@ func (c *Checker) Stop() {
 	os.Exit(0)
 }
 
-func (c *Checker) predeployDocker(prefix string, apps []string) {
-	var project string
-	for _, app := range apps {
+func (c *Checker) predeployDocker(images []string) {
+	docker, err := docker.New(c.DockerUsername, c.DockerPassword, *c.Logging)
+	var wg sync.WaitGroup
+	for _, image := range images {
+		wg.Add(1)
 		go func(app string) {
-			if prefix != "" {
-				project = c.DockerRepository + "/" + prefix + "-" + app
-			} else {
-				project = c.DockerRepository + "/" + app
-			}
+			defer wg.Done()
 
-			docker, err := docker.New(c.DockerUsername, c.DockerPassword, project, c.DockerTag, *c.Logging)
+			c.Log().Infof("Checking image %s with tag %s", app, c.DockerTag)
 			if err != nil {
 				c.Log().Fatal(err)
 			}
-			if docker.IsDockerImageExist() {
-				c.Log().Infof("Docker container %s with tag %s exist", project, c.DockerTag)
+			if docker.IsDockerImageExist(app, c.DockerTag) {
+				c.Log().Infof("Docker container %s with tag %s exist", app, c.DockerTag)
 			} else {
-				log.Errorf("Docker container %s with tag %s exist", project, c.DockerTag)
+				log.Errorf("Docker container %s with tag %s exist", app, c.DockerTag)
 			}
-		}(app)
+		}(image)
 	}
+	wg.Wait()
 }
 
-func (c *Checker) predeployK8s() {
+func (c *Checker) predeployK8s() []string {
 	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
 	if err != nil {
 		c.Log().Fatal(err)
 	}
 	c.Log().Info("Starting pre deploy check")
-	k.PrepareDeployment(c.Development)
+	return k.PrepareDeployment(c.Development, c.DockerRepository)
 }
 
 func (c *Checker) monitoringK8s() {
@@ -186,10 +185,10 @@ func (c *Checker) monitoringK8s() {
 }
 
 func (c *Checker) predeployChecks(prefix string, apps string) {
+	images := c.predeployK8s()
 	if !c.SkipCheckImage {
-		c.predeployDocker(prefix, strings.Split(apps, ","))
+		c.predeployDocker(images)
 	}
-	c.predeployK8s()
 	c.Log().Info("All checks passed")
 }
 

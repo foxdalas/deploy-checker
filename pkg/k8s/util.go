@@ -11,6 +11,9 @@ import (
 func (k *k8s) findDeployments(searchDir string) []string {
 	fileList := []string{}
 	err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
+		if strings.Contains(path, "vendor") {
+			return nil
+		}
 		if strings.Contains(path, "deployment.yml") {
 			fileList = append(fileList, path)
 			k.Log().Infof("Founded deployment file %s", path)

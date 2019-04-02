@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func New(username string, password string, repository string, tag string, log log.Entry) (*docker, error) {
+func New(username string, password string, log log.Entry) (*docker, error) {
 	url := "https://registry-1.docker.io/"
 	hub, err := registry.New(url, username, password, log.Infof)
 	if err != nil {
@@ -15,31 +15,29 @@ func New(username string, password string, repository string, tag string, log lo
 
 	return &docker{
 		registry:   hub,
-		repository: repository,
-		tag:        tag,
 	}, nil
 }
 
-func (d *docker) getTags() ([]string, error) {
-	tags, err := d.registry.Tags(d.repository)
+func (d *docker) getTags(image string) ([]string, error) {
+	tags, err := d.registry.Tags(image)
 	return tags, err
 }
 
-func (d *docker) IsDockerImageExist() bool {
-	tags, err := d.getTags()
+func (d *docker) IsDockerImageExist(image string, tag string) bool {
+	tags, err := d.getTags(image)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
 
 	}
-	if d.isDockerTagExist(tags) {
+	if d.isDockerTagExist(tags, tag) {
 		return true
 	}
 	return false
 }
 
-func (d *docker) isDockerTagExist(tags []string) bool {
-	return contains(tags, d.tag)
+func (d *docker) isDockerTagExist(tags []string, tag string) bool {
+	return contains(tags, tag)
 }
 
 func contains(slice []string, item string) bool {
