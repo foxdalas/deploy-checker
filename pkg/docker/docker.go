@@ -14,7 +14,7 @@ func New(username string, password string, log log.Entry) (*docker, error) {
 	}
 
 	return &docker{
-		registry:   hub,
+		registry: hub,
 	}, nil
 }
 

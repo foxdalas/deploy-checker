@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -106,10 +107,15 @@ func (k *k8s) cleanupResources() {
 	k.Log().Info("Cleanup deployment for development environment")
 	var containers []v1.Container
 
-	for _, c := range k.yamlDeployment.Spec.Template.Spec.Containers {
-		c.Resources.Requests = nil
-		c.Resources.Limits = nil
+	resources := v1.ResourceRequirements{
+		Limits: v1.ResourceList{
+			"memory": resource.MustParse("4Gi"),
+		},
+		Requests: v1.ResourceList{},
+	}
 
+	for _, c := range k.yamlDeployment.Spec.Template.Spec.Containers {
+		c.Resources = resources
 		containers = append(containers, c)
 	}
 	k.yamlDeployment.Spec.Template.Spec.Containers = containers
@@ -277,7 +283,7 @@ func (k *k8s) GetAlertFromFile(root string) (AlertFile, error) {
 
 func (k *k8s) getImages(repo string) (string, error) {
 	for _, container := range k.yamlDeployment.Spec.Template.Spec.Containers {
-		if (strings.Split(container.Image, "/")[0] == repo) {
+		if strings.Split(container.Image, "/")[0] == repo {
 			return strings.Split(container.Image, ":")[0], nil
 		}
 	}
