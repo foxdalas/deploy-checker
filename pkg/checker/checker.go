@@ -147,6 +147,9 @@ func (c *Checker) monitoringK8s() {
 
 	c.Log().Info("Getting current configmap")
 	configmap, err := k.GetConfigMap("prometheus-aviasales", "prometheus")
+	if err != nil {
+		c.Log().Fatal(err)
+	}
 
 	backup := &v1.ConfigMap{}
 	b, err := json.Marshal(configmap)
@@ -176,6 +179,7 @@ func (c *Checker) monitoringK8s() {
 	if err != nil {
 		c.Log().Error(err)
 	}
+
 	configmap.Data["alerts"] = string(binaryData)
 	c.Log().Infof("Uploading alerts to configmap %s", configmap.Name)
 	_, err = k.SetConfigMap(configmap, "prometheus")
