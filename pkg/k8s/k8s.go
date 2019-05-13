@@ -111,7 +111,10 @@ func (k *k8s) cleanupResources() {
 		Limits: v1.ResourceList{
 			"memory": resource.MustParse("4Gi"),
 		},
-		Requests: v1.ResourceList{},
+		Requests: v1.ResourceList{
+			"cpu": resource.MustParse("1m"),
+			"memory": resource.MustParse("1Mi"),
+		},
 	}
 
 	for _, c := range k.yamlDeployment.Spec.Template.Spec.Containers {
