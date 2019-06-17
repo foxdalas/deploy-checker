@@ -16,7 +16,7 @@ func (k *k8s) findDeployments(searchDir string) []string {
 		}
 		if strings.Contains(path, "deployment.yml") {
 			fileList = append(fileList, path)
-			k.Log().Infof("Founded deployment file %s", path)
+			k.Log().Infof("Found deployment file %s", path)
 		}
 		return nil
 	})

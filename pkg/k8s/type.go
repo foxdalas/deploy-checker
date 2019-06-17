@@ -3,7 +3,7 @@ package k8s
 import (
 	"github.com/foxdalas/deploy-checker/pkg/checker_const"
 	"github.com/sirupsen/logrus"
-	"k8s.io/api/extensions/v1beta1"
+	v1 "k8s.io/api/apps/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -16,8 +16,8 @@ type k8s struct {
 	namespace      string
 	deploymentFile string
 
-	k8sDeployment  *v1beta1.Deployment
-	yamlDeployment *v1beta1.Deployment
+	k8sDeployment  *v1.Deployment
+	yamlDeployment *v1.Deployment
 	development    bool
 }
 
