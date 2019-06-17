@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -60,8 +61,8 @@ func (k *k8s) isDeploymentExist(name string) bool {
 	return true
 }
 
-func (k *k8s) getKubernetesDeployment(name string) *v1beta1.Deployment {
-	deploymentsClient := k.client.Extensions().Deployments(k.namespace)
+func (k *k8s) getKubernetesDeployment(name string) *appsv1.Deployment {
+	deploymentsClient := k.client.AppsV1().Deployments(k.namespace)
 	obj, err := deploymentsClient.Get(name, metav1.GetOptions{})
 	if err != nil {
 		k.Log().Fatal(err)
@@ -82,10 +83,16 @@ func (k *k8s) getDeploymentFile(path string) {
 		k.Log().Fatal(fmt.Sprintf("Error while decoding YAML object. Err was: %s", err))
 	}
 	switch o := obj.(type) {
-	case *v1beta1.Deployment:
+	case *appsv1.Deployment:
 		k.yamlDeployment = o
+	case *v1beta1.Deployment:
+		dst := &appsv1.Deployment{}
+		if err = scheme.Scheme.Convert(obj, dst, nil); err != nil {
+			k.Log().Fatalf("File %s %s", path, err)
+		}
+		k.yamlDeployment = dst
 	default:
-		k.Log().Fatalf("File %s is not a kubernetes deployment", k.deploymentFile)
+		k.Log().Fatalf("File %s is not a kubernetes deployment", path)
 	}
 }
 
@@ -112,7 +119,7 @@ func (k *k8s) cleanupResources() {
 			"memory": resource.MustParse("4Gi"),
 		},
 		Requests: v1.ResourceList{
-			"cpu": resource.MustParse("1m"),
+			"cpu":    resource.MustParse("1m"),
 			"memory": resource.MustParse("1Mi"),
 		},
 	}
@@ -162,19 +169,19 @@ func (k *k8s) PrepareDeployment(development bool, dockerRepo string) []string {
 	return images
 }
 
-func (k *k8s) DeploymentProgress(deployment *v1beta1.Deployment) v1beta1.DeploymentConditionType {
+func (k *k8s) DeploymentProgress(deployment *appsv1.Deployment) appsv1.DeploymentConditionType {
 	conditions := deployment.Status.Conditions
 	lastCondition := conditions[len(k.k8sDeployment.Status.Conditions)-1]
 	return lastCondition.Type
 }
 
 func (k *k8s) deploymentInProgress(name string) (string, bool, error) {
-	deployment, err := k.client.Extensions().Deployments(k.namespace).Get(name, metav1.GetOptions{})
+	deployment, err := k.client.AppsV1().Deployments(k.namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		k.Log().Error(err)
 	}
 	if deployment.Generation <= deployment.Status.ObservedGeneration {
-		cond := getDeploymentCondition(deployment.Status, v1beta1.DeploymentProgressing)
+		cond := getDeploymentCondition(deployment.Status, appsv1.DeploymentProgressing)
 		if cond != nil && cond.Reason == TimedOutReason {
 			return "", false, fmt.Errorf("deployment %q exceeded its progress deadline", name)
 		}
@@ -192,7 +199,7 @@ func (k *k8s) deploymentInProgress(name string) (string, bool, error) {
 	return fmt.Sprintf("Waiting for deployment spec update to be observed..."), false, nil
 }
 
-func getDeploymentCondition(status v1beta1.DeploymentStatus, condType v1beta1.DeploymentConditionType) *v1beta1.DeploymentCondition {
+func getDeploymentCondition(status appsv1.DeploymentStatus, condType appsv1.DeploymentConditionType) *appsv1.DeploymentCondition {
 	for i := range status.Conditions {
 		c := status.Conditions[i]
 		if c.Type == condType {
