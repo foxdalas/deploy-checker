@@ -91,6 +91,8 @@ func (k *k8s) getDeploymentFile(path string) {
 			k.Log().Fatalf("File %s %s", path, err)
 		}
 		k.yamlDeployment = dst
+		k.Log().Infof("Converting deployment file %s to apps/v1", path)
+		k.Log().Warn("DEPLOYMENT FORMAT IS EXTENTION/V1BETA1! PLEASE USE APPS/V1")
 		k.writeDeploymentFile(path)
 	default:
 		k.Log().Fatalf("File %s is not a kubernetes deployment", path)
