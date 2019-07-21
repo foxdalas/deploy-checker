@@ -91,6 +91,7 @@ func (k *k8s) getDeploymentFile(path string) {
 			k.Log().Fatalf("File %s %s", path, err)
 		}
 		k.yamlDeployment = dst
+		k.writeDeploymentFile(path)
 	default:
 		k.Log().Fatalf("File %s is not a kubernetes deployment", path)
 	}
