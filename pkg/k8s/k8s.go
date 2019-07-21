@@ -80,18 +80,25 @@ func (k *k8s) getDeploymentFile(path string) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	obj, _, err := decode([]byte(dat), nil, nil)
 	if err != nil {
-		k.Log().Fatal(fmt.Sprintf("Error while decoding YAML object. Err was: %s", err))
+		k.Log().Fatalf("Error while decoding YAML object. Err was: %s", err)
 	}
 	switch o := obj.(type) {
 	case *appsv1.Deployment:
 		k.yamlDeployment = o
+		k.Log().Infof("Deployment file %s is apps/v1", path)
+		return
 	case *v1beta1.Deployment:
 		dst := &appsv1.Deployment{}
 		if err = scheme.Scheme.Convert(obj, dst, nil); err != nil {
 			k.Log().Fatalf("File %s %s", path, err)
 		}
 		k.yamlDeployment = dst
+		k.Log().Infof("Converting deployment file %s to apps/v1", path)
+		k.Log().Warn("DEPLOYMENT FORMAT IS EXTENTION/V1BETA1! PLEASE USE APPS/V1")
+		k.yamlDeployment.TypeMeta.APIVersion = "apps/v1"
+		k.yamlDeployment.TypeMeta.Kind = "Deployment"
 		k.writeDeploymentFile(path)
+		k.getDeploymentFile(path)
 	default:
 		k.Log().Fatalf("File %s is not a kubernetes deployment", path)
 	}
