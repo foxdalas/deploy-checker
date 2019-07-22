@@ -85,7 +85,7 @@ func (k *k8s) getDeploymentFile(path string) {
 	switch o := obj.(type) {
 	case *appsv1.Deployment:
 		k.yamlDeployment = o
-		k.Log().Infof("Deployment file %s is apps/v1", path)
+		k.Log().Debugf("Deployment file %s is apps/v1", path)
 		return
 	case *v1beta1.Deployment:
 		k.Log().Warnf("DEPLOYMENT FORMAT IS %s PLEASE USE APPS/V1", o.APIVersion)

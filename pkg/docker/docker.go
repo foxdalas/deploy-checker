@@ -8,7 +8,7 @@ import (
 
 func New(username string, password string, log log.Entry) (*docker, error) {
 	url := "https://registry-1.docker.io/"
-	hub, err := registry.New(url, username, password, log.Infof)
+	hub, err := registry.New(url, username, password, log.Debugf)
 	if err != nil {
 		return nil, err
 	}
