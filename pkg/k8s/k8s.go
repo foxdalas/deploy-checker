@@ -88,15 +88,8 @@ func (k *k8s) getDeploymentFile(path string) {
 		k.Log().Infof("Deployment file %s is apps/v1", path)
 		return
 	case *v1beta1.Deployment:
-		dst := &appsv1.Deployment{}
-		if err = scheme.Scheme.Convert(obj, dst, nil); err != nil {
-			k.Log().Fatalf("File %s %s", path, err)
-		}
-		k.yamlDeployment = dst
-		k.Log().Infof("Converting deployment file %s to apps/v1", path)
-		k.Log().Warn("DEPLOYMENT FORMAT IS EXTENTION/V1BETA1! PLEASE USE APPS/V1")
-		k.yamlDeployment.TypeMeta.APIVersion = "apps/v1"
-		k.yamlDeployment.TypeMeta.Kind = "Deployment"
+		k.Log().Warnf("DEPLOYMENT FORMAT IS %s PLEASE USE APPS/V1", o.APIVersion)
+		k.yamlDeployment, err = k.convertDeployment(o)
 		k.writeDeploymentFile(path)
 		k.getDeploymentFile(path)
 	default:
@@ -104,17 +97,28 @@ func (k *k8s) getDeploymentFile(path string) {
 	}
 }
 
+func (k *k8s) convertDeployment(data v1beta1.Deployment) (*appsv1.Deployment, error) {
+	var deployment *appsv1.Deployment
+	dst := &appsv1.Deployment{}
+	if err := scheme.Scheme.Convert(data, dst, nil); err != nil {
+		return deployment, err
+	}
+	deployment = dst
+	deployment.TypeMeta.APIVersion = "apps/v1"
+	deployment.TypeMeta.Kind = "Deployment"
+
+	return deployment, nil
+}
+
+
+
 func (k *k8s) updateDeploymentFile(path string) {
 	if *k.k8sDeployment.Spec.Replicas != *k.yamlDeployment.Spec.Replicas {
 		k.Log().Infof("Current deployment is changed. Replicas in repository %d and %d replicas in k8s", *k.yamlDeployment.Spec.Replicas,
 			*k.k8sDeployment.Spec.Replicas)
-	} else {
-		return
 	}
-
 	//Fix replicas
 	*k.yamlDeployment.Spec.Replicas = *k.k8sDeployment.Spec.Replicas
-
 	k.writeDeploymentFile(path)
 }
 
