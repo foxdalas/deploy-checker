@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/foxdalas/deploy-checker/pkg/checker_const"
 	"github.com/pkg/errors"
@@ -11,12 +12,14 @@ import (
 	"k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -110,8 +113,6 @@ func (k *k8s) convertDeployment(data *v1beta1.Deployment) (*appsv1.Deployment, e
 	return deployment, nil
 }
 
-
-
 func (k *k8s) updateDeploymentFile(path string) {
 	if *k.k8sDeployment.Spec.Replicas != *k.yamlDeployment.Spec.Replicas {
 		k.Log().Infof("Current deployment is changed. Replicas in repository %d and %d replicas in k8s", *k.yamlDeployment.Spec.Replicas,
@@ -179,6 +180,30 @@ func (k *k8s) PrepareDeployment(development bool, dockerRepo string) []string {
 		images = append(images, image)
 	}
 	return images
+}
+
+var variableRegex = regexp.MustCompile(`\$[A-Z]+(_|[A-Z]+)*`)
+
+func (k *k8s) UnprocessedVariablesDeployments() []string {
+	var res []string
+	for _, path := range k.findDeployments(".") {
+		k.getDeploymentFile(path)
+
+		deployment := k.getKubernetesDeployment(k.yamlDeployment.Name)
+
+		var yamlBytes []byte
+		s := json.NewYAMLSerializer(json.DefaultMetaFactory, nil, nil)
+		err := s.Encode(deployment, bytes.NewBuffer(yamlBytes))
+		if err != nil {
+			k.Log().Fatal(err)
+		}
+
+		if variableRegex.Match(yamlBytes) {
+			res = append(res, k.yamlDeployment.Name)
+		}
+	}
+
+	return res
 }
 
 func (k *k8s) DeploymentProgress(deployment *appsv1.Deployment) appsv1.DeploymentConditionType {
