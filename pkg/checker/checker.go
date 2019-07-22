@@ -86,6 +86,11 @@ func (c *Checker) Init() {
 		return
 	}
 
+	if c.CheckDeployments {
+		c.checkDeployments()
+		return
+	}
+
 	c.predeployChecks(c.Prefix, c.Apps)
 }
 
@@ -231,4 +236,16 @@ func (c *Checker) rollbarReport() {
 		c.Log().Panic(err)
 	}
 	defer resp.Body.Close()
+}
+
+func (c *Checker) checkDeployments() {
+	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
+	if err != nil {
+		c.Log().Fatal(err)
+	}
+	c.Log().Info("Starting deployments checks")
+
+	if res := k.UnprocessedVariablesDeployments(); len(res) > 0 {
+		c.Log().Fatalf("Deployments with unprocessed variables were found: %v", res)
+	}
 }

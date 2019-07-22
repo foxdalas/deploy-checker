@@ -33,11 +33,12 @@ type Checker struct {
 	CurrentDeployment *v1beta1.Deployment
 	InRepoDeployment  *v1beta1.Deployment
 
-	DeployProgress  bool
-	Report          bool
-	Development     bool
-	MonitoringRules string
-	MonitoringOnly  bool
+	DeployProgress   bool
+	Report           bool
+	Development      bool
+	MonitoringRules  string
+	MonitoringOnly   bool
+	CheckDeployments bool
 
 	StopCh    chan struct{}
 	WaitGroup sync.WaitGroup
