@@ -97,7 +97,7 @@ func (k *k8s) getDeploymentFile(path string) {
 	}
 }
 
-func (k *k8s) convertDeployment(data v1beta1.Deployment) (*appsv1.Deployment, error) {
+func (k *k8s) convertDeployment(data *v1beta1.Deployment) (*appsv1.Deployment, error) {
 	var deployment *appsv1.Deployment
 	dst := &appsv1.Deployment{}
 	if err := scheme.Scheme.Convert(data, dst, nil); err != nil {

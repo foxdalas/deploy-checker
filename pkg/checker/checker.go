@@ -111,12 +111,12 @@ func (c *Checker) predeployDocker(images []string) {
 		go func(app string) {
 			defer wg.Done()
 
-			c.Log().Infof("Checking image %s with tag %s", app, c.DockerTag)
+			c.Log().Debugf("Checking image %s with tag %s", app, c.DockerTag)
 			if err != nil {
 				c.Log().Fatal(err)
 			}
 			if docker.IsDockerImageExist(app, c.DockerTag) {
-				c.Log().Infof("Docker container %s with tag %s exist", app, c.DockerTag)
+				c.Log().Debugf("Docker container %s with tag %s exist", app, c.DockerTag)
 			} else {
 				log.Errorf("Docker container %s with tag %s exist", app, c.DockerTag)
 			}
