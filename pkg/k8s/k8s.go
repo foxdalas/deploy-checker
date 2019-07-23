@@ -189,6 +189,11 @@ func (k *k8s) UnprocessedVariablesDeployments() []string {
 	for _, path := range k.findDeployments(".") {
 		k.getDeploymentFile(path)
 
+		if !k.isDeploymentExist(k.yamlDeployment.Name) {
+			k.Log().Infof("Deployment not found in kubernetes. Is a new deploy %s", k.yamlDeployment.Name)
+			continue
+		}
+
 		deployment := k.getKubernetesDeployment(k.yamlDeployment.Name)
 
 		var yamlBytes []byte
