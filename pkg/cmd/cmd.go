@@ -60,7 +60,7 @@ func params(c *checker.Checker) error {
 	flag.BoolVar(&c.Report, "report", false, "Send deploy state to elasticsearch")
 	flag.StringVar(&c.MonitoringRules, "monitoring", "monitoring", "Deploy monitoring")
 	flag.BoolVar(&c.MonitoringOnly, "mon-only", false, "Only upload alert rules")
-	flag.BoolVar(&c.SkipCheckImage, "skip-docker-check", false, "Skip verify docker image in docker hub")
+	flag.BoolVar(&c.SkipCheckImage, "skip-docker-check", true, "Skip verify docker image in docker hub")
 	flag.BoolVar(&c.CheckDeployments, "check-deployments", false, "Checking kubernetes deployment result files")
 	flag.BoolVar(&c.Development, "development", false, "Change deployment for development environment. Cleanup resources, nodeSelector...")
 
