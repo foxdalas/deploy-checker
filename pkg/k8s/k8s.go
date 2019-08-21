@@ -8,6 +8,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -95,6 +96,9 @@ func (k *k8s) getDeploymentFile(path string) {
 		k.yamlDeployment, err = k.convertDeployment(o)
 		k.writeDeploymentFile(path)
 		k.getDeploymentFile(path)
+  case *batchv1.Job: //batch here was added for testing purpose, remove this case anytime
+    k.Log().Warnf("Type Job is not supported! Skiping..", path)
+    return
 	default:
 		k.Log().Fatalf("File %s is not a kubernetes deployment", path)
 	}
