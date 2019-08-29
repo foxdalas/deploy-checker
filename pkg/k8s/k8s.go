@@ -117,13 +117,24 @@ func (k *k8s) convertDeployment(data *v1beta1.Deployment) (*appsv1.Deployment, e
 	return deployment, nil
 }
 
-func (k *k8s) updateDeploymentFile(path string) {
-	if *k.k8sDeployment.Spec.Replicas != *k.yamlDeployment.Spec.Replicas {
-		k.Log().Infof("Current deployment is changed. Replicas in repository %d and %d replicas in k8s", *k.yamlDeployment.Spec.Replicas,
-			*k.k8sDeployment.Spec.Replicas)
+func (k *k8s) updateDeploymentFile(isExist bool, path string) {
+	if isExist {
+		k.k8sDeployment = k.getKubernetesDeployment(k.yamlDeployment.Name)
+		if *k.k8sDeployment.Spec.Replicas != *k.yamlDeployment.Spec.Replicas {
+			k.Log().Infof("Current deployment is changed. Replicas in repository %d and %d replicas in k8s", *k.yamlDeployment.Spec.Replicas,
+				*k.k8sDeployment.Spec.Replicas)
+		}
+		//Fix replicas
+		*k.yamlDeployment.Spec.Replicas = *k.k8sDeployment.Spec.Replicas
+
+	} else {
+		k.Log().Infof("Deployment not found in kubernetes. Is a new deploy %s", k.yamlDeployment.Name)
 	}
-	//Fix replicas
-	*k.yamlDeployment.Spec.Replicas = *k.k8sDeployment.Spec.Replicas
+	//Fix CreationTimestamp
+	k.yamlDeployment.CreationTimestamp = metav1.Now()
+	k.yamlDeployment.ObjectMeta.CreationTimestamp = metav1.Now()
+	k.yamlDeployment.Spec.Template.CreationTimestamp = metav1.Now()
+
 	k.writeDeploymentFile(path)
 }
 
@@ -170,13 +181,8 @@ func (k *k8s) PrepareDeployment(development bool, dockerRepo string) []string {
 		if development {
 			k.prepareDeploymentForDevelopement(path)
 		}
+		k.updateDeploymentFile(k.isDeploymentExist(k.yamlDeployment.Name), path)
 
-		if k.isDeploymentExist(k.yamlDeployment.Name) {
-			k.k8sDeployment = k.getKubernetesDeployment(k.yamlDeployment.Name)
-			k.updateDeploymentFile(path)
-		} else {
-			k.Log().Infof("Deployment not found in kubernetes. Is a new deploy %s", k.yamlDeployment.Name)
-		}
 		image, err := k.getImages(dockerRepo)
 		if err != nil {
 			k.Log().Error(err)
