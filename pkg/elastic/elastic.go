@@ -41,12 +41,14 @@ func New(checker checker.Checker, elasticHost []string) (*elasticSearch, error) 
 
 func (e *elasticSearch) sendDocument(apps string, tags string, user string, namespace string, build string) {
 	msg := fmt.Sprintf("Deploy apps %s with build %s in namespace %s", apps, build, namespace)
+	annotags := user + "," + os.Getenv("DATACENTER")
 	message := &document{
 		Timestamp:  time.Now().UTC(),
 		User:       user,
 		Msg:        msg,
 		Tags:       tags,
 		Build:      build,
+		Annotags:	annotags,
 		Datacenter: os.Getenv("DATACENTER"),
 		Apps:       strings.Split(apps, ","),
 	}
