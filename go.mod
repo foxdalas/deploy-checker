@@ -1,0 +1,40 @@
+module github.com/foxdalas/deploy-checker
+
+go 1.13
+
+require (
+	github.com/docker/distribution v2.6.0-rc.1.0.20180720172123-0dae0957e5fe+incompatible
+	github.com/docker/libtrust v0.0.0-20150114040149-fa567046d9b1
+	github.com/foxdalas/docker-registry-client v0.0.0-20180803075622-d4dc45b3bcea
+	github.com/ghodss/yaml v0.0.0-20150909031657-73d445a93680
+	github.com/gogo/protobuf v0.0.0-20170330071051-c0656edd0d9e
+	github.com/golang/glog v0.0.0-20141105023935-44145f04b68c
+	github.com/golang/protobuf v1.1.0
+	github.com/google/btree v0.0.0-20180124185431-e89373fe6b4a
+	github.com/google/gofuzz v0.0.0-20161122191042-44d81051d367
+	github.com/googleapis/gnostic v0.0.0-20170729233727-0c5108395e2d
+	github.com/gregjones/httpcache v0.0.0-20170728041850-787624de3eb7
+	github.com/imdario/mergo v0.0.0-20141206190957-6633656539c1
+	github.com/json-iterator/go v0.0.0-20180612202835-f2b4162afba3
+	github.com/mailru/easyjson v0.0.0-20180730094502-03f2033d19d5
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
+	github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742
+	github.com/olivere/elastic v6.2.16+incompatible
+	github.com/opencontainers/go-digest v1.0.0-rc1
+	github.com/opencontainers/image-spec v1.0.0
+	github.com/petar/GoLLRB v0.0.0-20130427215148-53be0d36a84c
+	github.com/peterbourgon/diskv v2.0.1+incompatible
+	github.com/pkg/errors v0.8.0
+	github.com/sirupsen/logrus v1.0.1-0.20170620144510-3d4380f53a34
+	github.com/spf13/pflag v1.0.1
+	golang.org/x/crypto v0.0.0-20180222182404-49796115aa4b
+	golang.org/x/net v0.0.0-20180801234040-f4c29de78a2a
+	golang.org/x/sys v0.0.0-20180802203216-0ffbfd41fbef
+	golang.org/x/text v0.3.0
+	golang.org/x/time v0.0.0-20161028155119-f51c12702a4d
+	gopkg.in/inf.v0 v0.9.0
+	gopkg.in/yaml.v2 v2.2.1
+	k8s.io/api v0.0.0-20180711052118-183f3326a935
+	k8s.io/apimachinery v0.0.0-20180621070125-103fd098999d
+	k8s.io/client-go v8.0.0+incompatible
+)
