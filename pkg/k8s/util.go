@@ -39,7 +39,7 @@ func (k *k8s) writeDeploymentFile(path string) {
 	s := json.NewYAMLSerializer(json.DefaultMetaFactory, nil, nil)
 	err = s.Encode(k.yamlDeployment, f)
 	if err != nil {
-		k.Log().Fatal(err)
+		k.Log().Fatalf("File %s: %s", path, err)
 	}
 }
 

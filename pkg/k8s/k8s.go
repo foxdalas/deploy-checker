@@ -84,7 +84,7 @@ func (k *k8s) getDeploymentFile(path string) {
 	decode := scheme.Codecs.UniversalDeserializer().Decode
 	obj, _, err := decode([]byte(dat), nil, nil)
 	if err != nil {
-		k.Log().Fatalf("Error while decoding YAML object. Err was: %s", err)
+		k.Log().Fatalf("Error while decoding YAML object in file %s. Err was: %s",path, err)
 	}
 	switch o := obj.(type) {
 	case *appsv1.Deployment:
