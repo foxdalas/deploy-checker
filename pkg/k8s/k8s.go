@@ -173,9 +173,9 @@ func (k *k8s) prepareDeploymentForDevelopement(path string) {
 	k.writeDeploymentFile(path)
 }
 
-func (k *k8s) PrepareDeployment(development bool, dockerRepo string) []string {
+func (k *k8s) PrepareDeployment(dir string, development bool, dockerRepo string) []string {
 	var images []string
-	for _, path := range k.findDeployments(".") {
+	for _, path := range k.findDeployments(dir) {
 		k.getDeploymentFile(path)
 
 		if development {
@@ -194,9 +194,9 @@ func (k *k8s) PrepareDeployment(development bool, dockerRepo string) []string {
 
 var variableRegex = regexp.MustCompile(`\$[A-Z]+(_|[A-Z]+)*`)
 
-func (k *k8s) UnprocessedVariablesDeployments() []string {
+func (k *k8s) UnprocessedVariablesDeployments(dir string) []string {
 	var res []string
-	for _, path := range k.findDeployments(".") {
+	for _, path := range k.findDeployments(dir) {
 		k.getDeploymentFile(path)
 
 		if !k.isDeploymentExist(k.yamlDeployment.Name) {

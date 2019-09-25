@@ -12,6 +12,8 @@ type Checker struct {
 
 	User string
 
+	ConfigurationDir string
+
 	//Docker
 	DockerRepository string
 	DockerTag        string

@@ -64,6 +64,8 @@ func params(c *checker.Checker) error {
 	flag.BoolVar(&c.CheckDeployments, "check-deployments", false, "Checking kubernetes deployment result files")
 	flag.BoolVar(&c.Development, "development", false, "Change deployment for development environment. Cleanup resources, nodeSelector...")
 
+	flag.StringVar(&c.ConfigurationDir, "dir", ".", "Configuration directory")
+
 	if home := homedir.HomeDir(); home != "" {
 		flag.StringVar(&c.KubeConfig, "kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
 	} else {

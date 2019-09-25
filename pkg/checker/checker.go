@@ -136,7 +136,7 @@ func (c *Checker) predeployK8s() []string {
 		c.Log().Fatal(err)
 	}
 	c.Log().Info("Starting pre deploy check")
-	return k.PrepareDeployment(c.Development, c.DockerRepository)
+	return k.PrepareDeployment(c.ConfigurationDir, c.Development, c.DockerRepository)
 }
 
 func (c *Checker) monitoringK8s() {
@@ -245,7 +245,7 @@ func (c *Checker) checkDeployments() {
 	}
 	c.Log().Info("Starting deployments checks")
 
-	if res := k.UnprocessedVariablesDeployments(); len(res) > 0 {
+	if res := k.UnprocessedVariablesDeployments(c.ConfigurationDir); len(res) > 0 {
 		c.Log().Fatalf("Deployments with unprocessed variables were found: %v", res)
 	}
 }
