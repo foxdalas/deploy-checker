@@ -25,7 +25,7 @@ type document struct {
 	Tags       string    `json:"tags"`
 	Build      string    `json:"build"`
 	Datacenter string    `json:"datacenter"`
-	Annotags   string	 `json:"annotags"`
+	Annotags   string    `json:"annotags"`
 	Apps       []string  `json:"apps"`
 }
 

@@ -56,12 +56,13 @@ func makeLog() *log.Entry {
 }
 
 func params(c *checker.Checker) error {
+	c.Log().Infof("Checker %s starting", c.Ver)
+
 	flag.BoolVar(&c.DeployProgress, "processing", false, "Checking kubernetes deploy progress")
 	flag.BoolVar(&c.Report, "report", false, "Send deploy state to elasticsearch")
 	flag.StringVar(&c.MonitoringRules, "monitoring", "monitoring", "Deploy monitoring")
 	flag.BoolVar(&c.MonitoringOnly, "mon-only", false, "Only upload alert rules")
 	flag.BoolVar(&c.SkipCheckImage, "skip-docker-check", true, "Skip verify docker image in docker hub")
-	flag.BoolVar(&c.CheckDeployments, "check-deployments", false, "Checking kubernetes deployment result files")
 	flag.BoolVar(&c.Development, "development", false, "Change deployment for development environment. Cleanup resources, nodeSelector...")
 
 	flag.StringVar(&c.ConfigurationDir, "dir", ".", "Configuration directory")
@@ -80,9 +81,6 @@ func params(c *checker.Checker) error {
 
 	flag.StringVar(&c.Prefix, "prefix", "", "Prefix back/front/etc")
 	flag.StringVar(&c.Apps, "apps", "", "Application list with separator")
-
-	c.DockerUsername = os.Getenv("DOCKER_USERNAME")
-	c.DockerPassword = os.Getenv("DOCKER_PASSWORD")
 
 	c.ElasticSearchURL = strings.Split(os.Getenv("ELASTICSEARCH_URL"), ",")
 
@@ -103,13 +101,6 @@ func params(c *checker.Checker) error {
 		if c.DockerTag == "" {
 			return errors.New("Please provide -tag option")
 		}
-
-		if c.DockerUsername == "" {
-			return errors.New("Please provide DOCKER_USERNAME environment value")
-		}
-		if c.DockerPassword == "" {
-			return errors.New("Please provide DOCKER_PASSWORD environment value")
-		}
 	} else {
 		if c.KubeNamespace == "" && len(c.MonitoringRules) == 0 {
 			return errors.New("Please provide -namespace option")
@@ -118,7 +109,8 @@ func params(c *checker.Checker) error {
 
 	//Automatic development for dev datacenter
 	if !c.Development && os.Getenv("DATACENTER") == "dev" {
-		c.Log().Infof("Datacenter %s. Development cluster rules activated1",os.Getenv("DATACENTER"))
+		c.Log().Infof("Datacenter %s. Development cluster rules activated1", os.Getenv("DATACENTER"))
+		c.Log().Info("Cleanup deployment for development environment")
 		c.Development = true
 	}
 

@@ -4,7 +4,7 @@ import (
 	"github.com/foxdalas/deploy-checker/pkg/cmd"
 )
 
-var AppVersion = "0.0.1"
+var AppVersion = "0.0.2"
 var AppGitCommit = ""
 var AppGitState = ""
 

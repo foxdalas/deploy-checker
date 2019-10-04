@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/foxdalas/deploy-checker/pkg/checker_const"
-	"github.com/foxdalas/deploy-checker/pkg/docker"
 	"github.com/foxdalas/deploy-checker/pkg/elastic"
 	"github.com/foxdalas/deploy-checker/pkg/k8s"
 	log "github.com/sirupsen/logrus"
@@ -30,7 +29,6 @@ func New(version string, logging *log.Entry) *Checker {
 }
 
 func (c *Checker) Init() {
-	c.Log().Infof("Checker %s starting", c.Ver)
 	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
 	if err != nil {
 		c.Log().Fatal()
@@ -86,11 +84,6 @@ func (c *Checker) Init() {
 		return
 	}
 
-	if c.CheckDeployments {
-		c.checkDeployments()
-		return
-	}
-
 	c.predeployChecks(c.Prefix, c.Apps)
 }
 
@@ -108,35 +101,13 @@ func (c *Checker) Stop() {
 	os.Exit(0)
 }
 
-func (c *Checker) predeployDocker(images []string) {
-	docker, err := docker.New(c.DockerUsername, c.DockerPassword, *c.Logging)
-	var wg sync.WaitGroup
-	for _, image := range images {
-		wg.Add(1)
-		go func(app string) {
-			defer wg.Done()
-
-			c.Log().Debugf("Checking image %s with tag %s", app, c.DockerTag)
-			if err != nil {
-				c.Log().Fatal(err)
-			}
-			if docker.IsDockerImageExist(app, c.DockerTag) {
-				c.Log().Debugf("Docker container %s with tag %s exist", app, c.DockerTag)
-			} else {
-				log.Errorf("Docker container %s with tag %s exist", app, c.DockerTag)
-			}
-		}(image)
-	}
-	wg.Wait()
-}
-
-func (c *Checker) predeployK8s() []string {
+func (c *Checker) predeployK8s() {
 	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
 	if err != nil {
 		c.Log().Fatal(err)
 	}
 	c.Log().Info("Starting pre deploy check")
-	return k.PrepareDeployment(c.ConfigurationDir, c.Development, c.DockerRepository)
+	k.PrepareResources(c.ConfigurationDir, c.Development)
 }
 
 func (c *Checker) monitoringK8s() {
@@ -194,9 +165,9 @@ func (c *Checker) monitoringK8s() {
 }
 
 func (c *Checker) predeployChecks(prefix string, apps string) {
-	images := c.predeployK8s()
+	c.predeployK8s()
 	if !c.SkipCheckImage {
-		c.predeployDocker(images)
+		//c.predeployDocker(images)
 	}
 	c.Log().Info("All checks passed")
 }
@@ -239,13 +210,13 @@ func (c *Checker) rollbarReport() {
 }
 
 func (c *Checker) checkDeployments() {
-	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
+	_, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
 	if err != nil {
 		c.Log().Fatal(err)
 	}
 	c.Log().Info("Starting deployments checks")
 
-	if res := k.UnprocessedVariablesDeployments(c.ConfigurationDir); len(res) > 0 {
-		c.Log().Fatalf("Deployments with unprocessed variables were found: %v", res)
-	}
+	//if res := k.UnprocessedVariablesDeployments(c.ConfigurationDir); len(res) > 0 {
+	//	c.Log().Fatalf("Deployments with unprocessed variables were found: %v", res)
+	//}
 }

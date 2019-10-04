@@ -17,9 +17,7 @@ type Checker struct {
 	//Docker
 	DockerRepository string
 	DockerTag        string
-	DockerUsername   string
-	DockerPassword   string
-	SkipCheckImage   bool
+	SkipCheckImage   bool //Todo Remove
 
 	//K8S
 	KubeConfig    string
@@ -35,12 +33,11 @@ type Checker struct {
 	CurrentDeployment *v1beta1.Deployment
 	InRepoDeployment  *v1beta1.Deployment
 
-	DeployProgress   bool
-	Report           bool
-	Development      bool
-	MonitoringRules  string
-	MonitoringOnly   bool
-	CheckDeployments bool
+	DeployProgress  bool
+	Report          bool
+	Development     bool
+	MonitoringRules string
+	MonitoringOnly  bool
 
 	StopCh    chan struct{}
 	WaitGroup sync.WaitGroup

@@ -48,7 +48,7 @@ func (e *elasticSearch) sendDocument(apps string, tags string, user string, name
 		Msg:        msg,
 		Tags:       tags,
 		Build:      build,
-		Annotags:	annotags,
+		Annotags:   annotags,
 		Datacenter: os.Getenv("DATACENTER"),
 		Apps:       strings.Split(apps, ","),
 	}
