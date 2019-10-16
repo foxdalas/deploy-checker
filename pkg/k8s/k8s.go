@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"github.com/foxdalas/deploy-checker/pkg/checker_const"
-	"github.com/pkg/errors"
 	yml "gopkg.in/yaml.v2"
 	"io/ioutil"
 	appsv1 "k8s.io/api/apps/v1"
@@ -16,7 +15,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 )
@@ -42,11 +40,11 @@ func New(checker checker.Checker, kubeconfig string, namespace string, developme
 		}
 	}
 
-	clientset, err := kubernetes.NewForConfig(config)
+	client, err := kubernetes.NewForConfig(config)
 
 	return &k8s{
 		checker:     checker,
-		client:      clientset,
+		client:      client,
 		namespace:   namespace,
 		development: development,
 	}, err
@@ -57,7 +55,7 @@ func (k *k8s) processingResources(resources []resourcesFile) {
 	for _, res := range resources {
 		wg.Add(1)
 		go func(dat resourcesFile) {
-			k.procerssingFile(&dat)
+			k.processingFile(&dat)
 			wg.Done()
 		}(res)
 	}
@@ -65,7 +63,7 @@ func (k *k8s) processingResources(resources []resourcesFile) {
 	wg.Wait()
 }
 
-func (k *k8s) procerssingFile(res *resourcesFile) {
+func (k *k8s) processingFile(res *resourcesFile) {
 	k.Log().Debugf("Processing file %s", res.path)
 	//Fix replicas
 	k.fixReplicas(res)
@@ -85,7 +83,7 @@ func (k *k8s) procerssingFile(res *resourcesFile) {
 		k.writeResourceFile(k.objectToBytes(o), res.path)
 	case *v1beta1.Deployment:
 		k.convertResources(res)
-		k.procerssingFile(res)
+		k.processingFile(res)
 	case *appsv1.StatefulSet:
 		k.writeResourceFile(k.objectToBytes(o), res.path)
 	case *batchv1.Job: //batch here was added for testing purpose, remove this case anytime
@@ -96,7 +94,6 @@ func (k *k8s) procerssingFile(res *resourcesFile) {
 }
 
 func (k *k8s) PrepareResources(dir string, development bool) {
-	//var images []string
 	k.processingResources(k.findResources(dir))
 }
 
@@ -180,13 +177,4 @@ func (k *k8s) GetAlertFromFile(root string) (AlertFile, error) {
 
 	}
 	return alertsData, err
-}
-
-func (k *k8s) getImages(repo string) (string, error) {
-	for _, container := range k.yamlResources.deployment.Spec.Template.Spec.Containers {
-		if strings.Split(container.Image, "/")[0] == repo {
-			return strings.Split(container.Image, ":")[0], nil
-		}
-	}
-	return "", errors.New("Image does not exist in deployment file")
 }

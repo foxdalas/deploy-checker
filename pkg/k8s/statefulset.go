@@ -13,13 +13,7 @@ func (k *k8s) getStatefulSet(name string, namespace string) *appsv1.StatefulSet 
 	return obj
 }
 
-func (k *k8s) StatefulSetProgress(statefulset *appsv1.StatefulSet) appsv1.StatefulSetConditionType {
-	conditions := statefulset.Status.Conditions
-	lastCondition := conditions[len(k.k8sResources.statefulset.Status.Conditions)-1]
-	return lastCondition.Type
-}
-
-func (k *k8s) isDStatefulsetExist(name string, namespace string) bool {
+func (k *k8s) isStatefulsetExist(name string, namespace string) bool {
 	_, err := k.client.AppsV1().StatefulSets(namespace).Get(name, metav1.GetOptions{})
 	if err != nil {
 		return false

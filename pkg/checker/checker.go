@@ -215,8 +215,4 @@ func (c *Checker) checkDeployments() {
 		c.Log().Fatal(err)
 	}
 	c.Log().Info("Starting deployments checks")
-
-	//if res := k.UnprocessedVariablesDeployments(c.ConfigurationDir); len(res) > 0 {
-	//	c.Log().Fatalf("Deployments with unprocessed variables were found: %v", res)
-	//}
 }
