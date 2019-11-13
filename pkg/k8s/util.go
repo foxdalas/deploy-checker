@@ -262,10 +262,10 @@ func (k *k8s) fixReplicas(res *resourcesFile) {
 	switch o := obj.(type) {
 	case *v1.Deployment:
 		if k.isResourceExist(o.Name, o.Namespace, res.resourceType) {
-			k.Log().Debugf("Deployment %s exist in namespace %s", o.Name, o.Namespace)
+			k.Log().Infof("Deployment %s exist in namespace %s", o.Name, o.Namespace)
 			deployment := k.getKubernetesDeployment(o.Name, o.Namespace)
 			if *deployment.Spec.Replicas != *o.Spec.Replicas {
-				k.Log().Debugf("Current deployment is changed. Replicas in repository %d and %d replicas in k8s", *o.Spec.Replicas,
+				k.Log().Infof("Current deployment is changed. Replicas in repository %d and %d replicas in k8s", *o.Spec.Replicas,
 					*deployment.Spec.Replicas)
 				*o.Spec.Replicas = *deployment.Spec.Replicas
 				res.data = k.objectToBytes(o)
