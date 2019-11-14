@@ -82,6 +82,8 @@ func params(c *checker.Checker) error {
 	flag.StringVar(&c.Prefix, "prefix", "", "Prefix back/front/etc")
 	flag.StringVar(&c.Apps, "apps", "", "Application list with separator")
 
+	flag.BoolVar(&c.Parallel, "parallel", false, "Enable parallel deploy via .deploy")
+
 	c.ElasticSearchURL = strings.Split(os.Getenv("ELASTICSEARCH_URL"), ",")
 
 	flag.Parse()

@@ -29,7 +29,7 @@ func New(version string, logging *log.Entry) *Checker {
 }
 
 func (c *Checker) Init() {
-	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
+	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development, c.Parallel)
 	if err != nil {
 		c.Log().Fatal()
 	}
@@ -102,16 +102,20 @@ func (c *Checker) Stop() {
 }
 
 func (c *Checker) predeployK8s() {
-	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
+	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development, c.Parallel)
 	if err != nil {
 		c.Log().Fatal(err)
 	}
-	c.Log().Info("Starting pre deploy check")
+	if len(os.Getenv("DATACENTER")) > 0 {
+		c.Log().Infof("Starting pre deploy check for cluster %s", os.Getenv("DATACENTER"))
+	} else {
+		c.Log().Infof("Starting pre deploy check")
+	}
 	k.PrepareResources(c.ConfigurationDir, c.Development)
 }
 
 func (c *Checker) monitoringK8s() {
-	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
+	k, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development, c.Parallel)
 	if err != nil {
 		c.Log().Fatal(err)
 	}
@@ -210,7 +214,7 @@ func (c *Checker) rollbarReport() {
 }
 
 func (c *Checker) checkDeployments() {
-	_, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development)
+	_, err := k8s.New(c, c.KubeConfig, c.KubeNamespace, c.Development, c.Parallel)
 	if err != nil {
 		c.Log().Fatal(err)
 	}

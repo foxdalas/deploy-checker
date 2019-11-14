@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-func New(checker checker.Checker, kubeconfig string, namespace string, development bool) (*k8s, error) {
+func New(checker checker.Checker, kubeconfig string, namespace string, development bool, parallel bool) (*k8s, error) {
 	var config *rest.Config
 	var err error
 
@@ -47,6 +47,7 @@ func New(checker checker.Checker, kubeconfig string, namespace string, developme
 		client:      client,
 		namespace:   namespace,
 		development: development,
+		parallel:    parallel,
 	}, err
 }
 

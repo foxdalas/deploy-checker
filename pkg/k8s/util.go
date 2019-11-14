@@ -57,23 +57,20 @@ func (k *k8s) findResources(searchDir string) []resourcesFile {
 	return data
 }
 
-func (k *k8s) writeDeploymentFile(path string) {
-	f, err := os.Create(path)
-	if err != nil {
-		k.Log().Fatal(err)
-	}
-
-	defer f.Close()
-
-	k.Log().Debugf("Updating file %s", path)
-	s := json.NewYAMLSerializer(json.DefaultMetaFactory, nil, nil)
-	err = s.Encode(k.yamlResources.deployment, f)
-	if err != nil {
-		k.Log().Fatalf("File %s: %s", path, err)
-	}
-}
-
 func (k *k8s) writeResourceFile(data []byte, path string) {
+	if k.parallel {
+		if len(os.Getenv("DATACENTER")) > 0 {
+			path = os.Getenv("DATACENTER") + "/" + path
+		}
+		path = ".deploy" + "/" + path
+
+		k.Log().Debugf("Creating directory %s", filepath.Dir(path))
+		err := os.MkdirAll(filepath.Dir(path), 0755)
+		if err != nil {
+			k.Log().Fatal(err)
+		}
+	}
+
 	f, err := os.Create(path)
 	if err != nil {
 		k.Log().Fatal(err)
@@ -262,10 +259,10 @@ func (k *k8s) fixReplicas(res *resourcesFile) {
 	switch o := obj.(type) {
 	case *v1.Deployment:
 		if k.isResourceExist(o.Name, o.Namespace, res.resourceType) {
-			k.Log().Infof("Deployment %s exist in namespace %s", o.Name, o.Namespace)
+			k.Log().Debugf("Deployment %s exist in namespace %s", o.Name, o.Namespace)
 			deployment := k.getKubernetesDeployment(o.Name, o.Namespace)
 			if *deployment.Spec.Replicas != *o.Spec.Replicas {
-				k.Log().Infof("Current deployment is changed. Replicas in repository %d and %d replicas in k8s", *o.Spec.Replicas,
+				k.Log().Infof("Deployment %s is changed. Replicas in repository %d and %d replicas in k8s", o.Name, *o.Spec.Replicas,
 					*deployment.Spec.Replicas)
 				*o.Spec.Replicas = *deployment.Spec.Replicas
 				res.data = k.objectToBytes(o)

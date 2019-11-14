@@ -23,6 +23,8 @@ type k8s struct {
 	namespace      string
 	deploymentFile string
 
+	parallel bool
+
 	yamlResources struct {
 		deployment  *v1.Deployment
 		statefulset *v1beta1.StatefulSet

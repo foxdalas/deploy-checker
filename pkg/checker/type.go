@@ -39,6 +39,8 @@ type Checker struct {
 	MonitoringRules string
 	MonitoringOnly  bool
 
+	Parallel bool
+
 	StopCh    chan struct{}
 	WaitGroup sync.WaitGroup
 }
