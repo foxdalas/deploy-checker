@@ -48,6 +48,18 @@ func (k *k8s) findResources(searchDir string) []resourcesFile {
 				resourceType: "statefulset",
 			})
 		}
+		if strings.Contains(path, "service.yml") {
+			dat, err := readFile(path)
+			if err != nil {
+				k.Log().Fatal(err)
+			}
+			k.Log().Debugf("Found service file %s", path)
+			data = append(data, resourcesFile{
+				path:         path,
+				data:         dat,
+				resourceType: "service",
+			})
+		}
 		return nil
 	})
 	if err != nil {
@@ -241,6 +253,9 @@ func (k *k8s) updateTimestamp(res *resourcesFile) {
 		o.CreationTimestamp = metav1.Now()
 		o.ObjectMeta.CreationTimestamp = metav1.Now()
 		o.Spec.Template.CreationTimestamp = metav1.Now()
+		res.data = k.objectToBytes(o)
+	case *corev1.Service:
+		o.ObjectMeta.CreationTimestamp = metav1.Now()
 		res.data = k.objectToBytes(o)
 	}
 }

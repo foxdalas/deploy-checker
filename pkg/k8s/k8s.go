@@ -87,6 +87,8 @@ func (k *k8s) processingFile(res *resourcesFile) {
 		k.processingFile(res)
 	case *appsv1.StatefulSet:
 		k.writeResourceFile(k.objectToBytes(o), res.path)
+	case *v1.Service:
+		k.writeResourceFile(k.objectToBytes(o), res.path)
 	case *batchv1.Job: //batch here was added for testing purpose, remove this case anytime
 		k.Log().Warnf("Type Job is not supported! Skiping..", res.path)
 	default:
