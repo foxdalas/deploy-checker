@@ -7,6 +7,7 @@ import (
 	v1 "k8s.io/api/apps/v1"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
 	corev1 "k8s.io/api/core/v1"
+	extentionsv1beta 	"k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -58,6 +59,18 @@ func (k *k8s) findResources(searchDir string) []resourcesFile {
 				path:         path,
 				data:         dat,
 				resourceType: "service",
+			})
+		}
+		if strings.Contains(path, "ingress.yml") {
+			dat, err := readFile(path)
+			if err != nil {
+				k.Log().Fatal(err)
+			}
+			k.Log().Debugf("Found ingress file %s", path)
+			data = append(data, resourcesFile{
+				path:         path,
+				data:         dat,
+				resourceType: "ingress",
 			})
 		}
 		return nil
@@ -255,6 +268,9 @@ func (k *k8s) updateTimestamp(res *resourcesFile) {
 		o.Spec.Template.CreationTimestamp = metav1.Now()
 		res.data = k.objectToBytes(o)
 	case *corev1.Service:
+		o.ObjectMeta.CreationTimestamp = metav1.Now()
+		res.data = k.objectToBytes(o)
+	case *extentionsv1beta.Ingress:
 		o.ObjectMeta.CreationTimestamp = metav1.Now()
 		res.data = k.objectToBytes(o)
 	}
