@@ -7,7 +7,7 @@ import (
 	v1 "k8s.io/api/apps/v1"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
 	corev1 "k8s.io/api/core/v1"
-	extentionsv1beta 	"k8s.io/api/extensions/v1beta1"
+	extentionsv1beta "k8s.io/api/extensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -23,6 +23,9 @@ func (k *k8s) findResources(searchDir string) []resourcesFile {
 
 	err := filepath.Walk(searchDir, func(path string, f os.FileInfo, err error) error {
 		if strings.Contains(path, "vendor") {
+			return nil
+		}
+		if strings.Contains(path, "monitoring") {
 			return nil
 		}
 		if strings.Contains(path, "deployment.yml") {
