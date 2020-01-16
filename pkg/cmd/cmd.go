@@ -110,7 +110,7 @@ func params(c *checker.Checker) error {
 	}
 
 	//Automatic development for dev datacenter
-	if !c.Development && os.Getenv("DATACENTER") == "dev" {
+	if (!c.Development && os.Getenv("DATACENTER") == "dev") || (!c.Development && os.Getenv("DATACENTER") == "testing") {
 		c.Log().Infof("Datacenter %s. Development cluster rules activated1", os.Getenv("DATACENTER"))
 		c.Log().Info("Cleanup deployment for development environment")
 		c.Development = true
