@@ -27,6 +27,7 @@ type document struct {
 	Datacenter string    `json:"datacenter"`
 	Annotags   string    `json:"annotags"`
 	Apps       []string  `json:"apps"`
+	Production string    `json:"production"`
 }
 
 type EsRetrier struct {

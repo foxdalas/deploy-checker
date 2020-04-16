@@ -57,7 +57,7 @@ type Group struct {
 		Expr   string `yaml:"expr"`
 		For    string `yaml:"for"`
 		Labels struct {
-			Severity string `yaml:"severity"`
+			Severity  string `yaml:"severity"`
 			Namespace string `yaml:"namespace"`
 		} `yaml:"labels"`
 	} `yaml:"rules"`
