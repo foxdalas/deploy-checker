@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/foxdalas/deploy-checker/pkg/checker_const"
-	"github.com/olivere/elastic"
+	elastic "github.com/olivere/elastic/v7"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"

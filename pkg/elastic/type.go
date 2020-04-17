@@ -2,7 +2,7 @@ package elastic
 
 import (
 	"github.com/foxdalas/deploy-checker/pkg/checker_const"
-	"github.com/olivere/elastic"
+	elastic "github.com/olivere/elastic/v7"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"time"
