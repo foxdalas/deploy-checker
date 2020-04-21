@@ -56,6 +56,7 @@ func (e *elasticSearch) sendDocument(apps string, tags string, user string, name
 	message := &document{
 		Timestamp:  time.Now().UTC(),
 		User:       user,
+		Namespace:  namespace,
 		Msg:        msg,
 		Tags:       tags,
 		Build:      build,

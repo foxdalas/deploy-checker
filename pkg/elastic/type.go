@@ -21,6 +21,7 @@ type elasticSearch struct {
 type document struct {
 	Timestamp  time.Time `json:"@timestamp"`
 	User       string    `json:"user"`
+	Namespace  string    `json:"namespace"`
 	Msg        string    `json:"msg"`
 	Tags       string    `json:"tags"`
 	Build      string    `json:"build"`
